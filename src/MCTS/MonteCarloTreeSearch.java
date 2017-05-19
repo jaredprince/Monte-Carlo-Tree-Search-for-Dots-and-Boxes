@@ -143,7 +143,7 @@ public class MonteCarloTreeSearch {
 		
 		/* Results */
 		System.out.println(height + "x" + width + " c=" + c + " matches=" + matches + " sims=" + simulationsPerTurn1 + "," + simulationsPerTurn2 + " p1=" + (game.scored ? "sc+" : "nsc+") + (game.nonsymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+") + (game2.nonsymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
-		System.out.println("nodes: " + totalNodes / matches);
+		System.out.println("Average nodes: " + totalNodes / matches);
 		System.out.println("average depth: " + (totalAveDepth / matches) + "\nAverage Time: ");
 		
 		for(int i = 0; i < times.length; i++){
@@ -173,6 +173,8 @@ public class MonteCarloTreeSearch {
 		
 		int result = -10;
 		
+		/* This is used as a backup to resolve flawed tests caused by ArrayIndexOutOfBounds or NullPointer errors during the game. 
+		 * When these errors occur, they return a result of -10, and the game is restarted. */
 		while(result == -10){
 			result = testGame(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
 		}

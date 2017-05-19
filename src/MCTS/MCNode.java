@@ -188,14 +188,8 @@ public class MCNode{
 	 * @return The newly created node.
 	 */
 	private MCNode getNextNode(int action){
-		
-		if(state instanceof GameStateScored){
-			GameStateScored newState = tree.game.getSuccessorState((GameStateScored)state, action);
-			return new MCNode(newState, depth + 1, tree.game.getActions(newState), tree);
-		} else{
-			GameState newState = tree.game.getSuccessorState(state, action);
-			return new MCNode(newState, depth + 1, tree.game.getActions(newState), tree);
-		}
+		GameState newState = tree.game.getSuccessorState(state, action);
+		return new MCNode(newState, depth + 1, tree.game.getActions(newState), tree);
 	}
 	
 	/**

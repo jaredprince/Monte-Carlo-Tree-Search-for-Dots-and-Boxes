@@ -438,7 +438,13 @@ public class DotsAndBoxes extends MCGame{
 	 */
 	public GameState getSuccessorState(GameState state, int action) {
 
-		GameState returnState = getSimpleSuccessorState(state, action);
+		GameState returnState;
+		
+		if(state instanceof GameStateScored){
+			returnState = getScoredSuccessorState((GameStateScored) state, action);
+		} else {
+			returnState = getSimpleSuccessorState(state, action);
+		}
 		
 		if(nonsymmetrical){
 			returnState = removeSymmetries(returnState);
@@ -640,7 +646,7 @@ public class DotsAndBoxes extends MCGame{
 	 * @param  action An integer representing which move is made.
 	 * @return The state after the move is made.
 	 */
-	public GameStateScored getSuccessorState(GameStateScored state, int action){
+	public GameStateScored getScoredSuccessorState(GameStateScored state, int action){
 		GameStateScored returnState = null;
 		int z = completedBoxesForEdge(action, state);
 		int score = state.playerNetScore;
@@ -666,10 +672,6 @@ public class DotsAndBoxes extends MCGame{
 		else{
 			long newState = (long) (state.longState + ((long) Math.pow(2, edges - action - 1)));
 			returnState = new GameStateScored(newState, score);
-		}
-		
-		if(nonsymmetrical){
-			returnState = removeSymmetries(returnState);
 		}
 		
 		return returnState;

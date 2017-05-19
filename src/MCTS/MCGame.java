@@ -29,13 +29,4 @@ public abstract class MCGame {
 	 * @return The state after the move is made.
 	 */
 	public abstract GameState getSuccessorState(GameState state, int action);
-	
-	/**
-	 * Gets the successor of a given scored state.
-	 * 
-	 * @param  state The state from which a move is made.
-	 * @param  action An integer representing which move is made.
-	 * @return The state after the move is made.
-	 */
-	public abstract GameStateScored getSuccessorState(GameStateScored state, int action);
 }
