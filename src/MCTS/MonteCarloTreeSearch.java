@@ -11,7 +11,7 @@ import java.util.Random;
  * @since       1.0
  */
 
-public class MCTS {
+public class MonteCarloTreeSearch {
 
 	/** Used to randomly pick actions.
 	 */
@@ -43,11 +43,11 @@ public class MCTS {
 
 	/** The tree of player one.
 	 */
-	static PolicyNodeTree tree;
+	static MCTree tree;
 	
 	/** The tree of player two.
 	 */
-	static PolicyNodeTree tree2;
+	static MCTree tree2;
 	
 	/** A 2D array representing the times taken for each move made by player one.
 	 *  Index i is an array of the total time taken by player one during turn i (in milliseconds) and the total number of times player one took turn i.
@@ -115,7 +115,7 @@ public class MCTS {
 	 * @param  simulationsPerTurn2 The number of simulations given to player two.
 	 * @param  matches The number of games to be played.
 	 */
-	public static void competition(PolicyNodeTree tree, DotsAndBoxes game, PolicyNodeTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2, int matches){
+	public static void competition(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2, int matches){
 	
 		int wins = 0;
 		int losses = 0;
@@ -166,10 +166,10 @@ public class MCTS {
 	 * @param  simulationsPerTurn2 The number of simulations given to player two.
 	 * @return An array of the form {result, average depth of the final tree for player one, number of nodes in the final tree for player one}.
 	 */
-	public static double[] match(PolicyNodeTree tree, DotsAndBoxes game, PolicyNodeTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2){
+	public static double[] match(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2){
 		
-		tree = game.scored ? new PolicyNodeTree(game, new GameStateScored(0, 0)) : new PolicyNodeTree(game, new GameState(0));
-		tree2 = game2.scored ? new PolicyNodeTree(game2, new GameStateScored(0, 0)) : new PolicyNodeTree(game2, new GameState(0));
+		tree = game.scored ? new MCTree(game, new GameStateScored(0, 0)) : new MCTree(game, new GameState(0));
+		tree2 = game2.scored ? new MCTree(game2, new GameStateScored(0, 0)) : new MCTree(game2, new GameState(0));
 		
 		int result = -10;
 		
@@ -196,7 +196,7 @@ public class MCTS {
 	 * @param  simulationsPerTurn2 The number of simulations given to player two.
 	 * @return An integer representing the result for player one.
 	 */
-	public static int testGame(PolicyNodeTree tree, DotsAndBoxes game, PolicyNodeTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2){
+	public static int testGame(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2){
 		
 		GameState terminalState = null;
 		
@@ -208,8 +208,8 @@ public class MCTS {
 		}
 		
 		//the current node of each tree
-		PolicyNode currentNode = tree.root;
-		PolicyNode currentNode2 = tree2.root;
+		MCNode currentNode = tree.root;
+		MCNode currentNode2 = tree2.root;
 		
 		//the game variables
 		int action = 0;
@@ -296,7 +296,7 @@ public class MCTS {
 	 * @param  actions An array of all the actions played during the selection portion of the game.
 	 * @param  result An integer representing the result for player one (-1 for a loss, 0 for a tie, and 1 for a win).
 	 */
-	public static void backup(PolicyNode[] nodes, boolean[] player, int[] actions, int result) {
+	public static void backup(MCNode[] nodes, boolean[] player, int[] actions, int result) {
 		for (int i = 0; i < nodes.length; i++) {			
 			if (nodes[i] == null) {
 				break;
@@ -364,7 +364,7 @@ public class MCTS {
 	 * @param  tree The tree to be used and updated. This tree should belong to the player running the simulation.
 	 * @param  game The game to be used. This game should belong to the player running the simulation.
 	 */
-	public static void simulate(GameState state, int p1Net, PolicyNode pastNode, GameState terminalState, PolicyNodeTree tree, DotsAndBoxes game) {
+	public static void simulate(GameState state, int p1Net, MCNode pastNode, GameState terminalState, MCTree tree, DotsAndBoxes game) {
 		boolean playerOne = true;
 		
 		int action = 0;
@@ -372,8 +372,8 @@ public class MCTS {
 		int[] actionsTaken = new int[edges + 1];
 
 		/* keep track of the traversed nodes */
-		PolicyNode[] playedNodes = new PolicyNode[edges];
-		PolicyNode currentNode = pastNode;
+		MCNode[] playedNodes = new MCNode[edges];
+		MCNode currentNode = pastNode;
 
 		playedNodes[0] = currentNode;
 		
@@ -477,7 +477,7 @@ public class MCTS {
 		int action = 0;
 		boolean playerOne = true;
 
-		PolicyNode currentNode = tree.root;
+		MCNode currentNode = tree.root;
 
 		/* for every move in the game */
 		for (int i = 0; i < edges; i++) {

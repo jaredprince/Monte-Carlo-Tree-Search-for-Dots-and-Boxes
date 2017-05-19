@@ -10,7 +10,7 @@ import java.util.Hashtable;
  * @since 1.0
  */
 
-public class PolicyNodeTree {
+public class MCTree {
 
 	/**
 	 * The number of nodes in the tree.
@@ -31,18 +31,18 @@ public class PolicyNodeTree {
 	/**
 	 * The MCTSGame to be used by this tree.
 	 */
-	public MCTSGame game;
+	public MCGame game;
 
 	/**
 	 * The root node of the tree.
 	 */
-	PolicyNode root;
+	MCNode root;
 
 	/**
 	 * The Hashtable which contains all the nodes of the tree with the string
 	 * representation of the state as the key.
 	 */
-	private Hashtable<String, PolicyNode> nodeTable = new Hashtable<String, PolicyNode>();
+	private Hashtable<String, MCNode> nodeTable = new Hashtable<String, MCNode>();
 
 	/**
 	 * Constructor for the PolicyNodeTree.
@@ -52,11 +52,11 @@ public class PolicyNodeTree {
 	 * @param state
 	 *            The state of the root node.
 	 */
-	public PolicyNodeTree(MCTSGame game, GameState state) {
+	public MCTree(MCGame game, GameState state) {
 		this.game = game;
 
 		/* initialize the root */
-		root = new PolicyNode(state, 0, game.getActions(state), this);
+		root = new MCNode(state, 0, game.getActions(state), this);
 		nodeTable.put(root.state.getString(), root);
 	}
 
@@ -67,7 +67,7 @@ public class PolicyNodeTree {
 	 *            PolicyNode equal to the one searched for.
 	 * @return The PolicyNode search for (null if not found).
 	 */
-	public PolicyNode findNode(PolicyNode node) {
+	public MCNode findNode(MCNode node) {
 		return nodeTable.get(node.state.getString());
 	}
 
@@ -79,8 +79,8 @@ public class PolicyNodeTree {
 	 * @return The node added or (if the node already exists in the tree) the
 	 *         equivalent node in the tree.
 	 */
-	public PolicyNode addNode(PolicyNode node) {
-		PolicyNode p = nodeTable.get(node.state.getString());
+	public MCNode addNode(MCNode node) {
+		MCNode p = nodeTable.get(node.state.getString());
 
 		if (p == null) {
 			p = node;

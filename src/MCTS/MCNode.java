@@ -9,7 +9,7 @@ import java.util.Random;
  * @since       1.0
  */
 
-public class PolicyNode{
+public class MCNode{
 
 	/** Random number generator used to get a random action during ties.
 	 */
@@ -33,7 +33,7 @@ public class PolicyNode{
 	
 	/** The tree to which this node belongs. Used to search for a node before an equivalent one is created. Also used to update tree statistics, including number of nodes and average depth.
 	 */
-	public PolicyNodeTree tree;
+	public MCTree tree;
 
 	/**
 	 * Constructor for the PolicyNode.
@@ -43,7 +43,7 @@ public class PolicyNode{
 	 * @param  actions The array of possible actions from this node.
 	 * @param  tree The tree to which this node belongs.
 	 */
-	public PolicyNode(GameState state, int depth, int[] actions, PolicyNodeTree tree) {
+	public MCNode(GameState state, int depth, int[] actions, MCTree tree) {
 		this.tree = tree;
 		
 		this.state = state;
@@ -98,7 +98,7 @@ public class PolicyNode{
 	 * @param  override True if a child should be added to the tree regardless of the number of times it has been selected.
 	 * @return  The successor or null.
 	 */
-	public PolicyNode getNode(int action, boolean override) {
+	public MCNode getNode(int action, boolean override) {
 		
 		/* check every action to find the one specified */
 		for (int i = 0; i < links.length; i++) {
@@ -111,9 +111,9 @@ public class PolicyNode{
 				}
 				
 				/* Create a new node */
-				else if(override || links[i].timesChosen == PolicyNodeTree.NODE_CREATION_COUNT){
+				else if(override || links[i].timesChosen == MCTree.NODE_CREATION_COUNT){
 
-					PolicyNode newNode = getNextNode(action);
+					MCNode newNode = getNextNode(action);
 					links[i].child = tree.addNode(newNode);
 					
 					return links[i].child;
@@ -130,7 +130,7 @@ public class PolicyNode{
 	 * @param  p The node to be compared to this one.
 	 * @return  True if the nodes are equivalent, false otherwise.
 	 */
-	public boolean equals(PolicyNode p) {
+	public boolean equals(MCNode p) {
 		return p.state.equals(this.state);
 	}
 
@@ -187,14 +187,14 @@ public class PolicyNode{
 	 * @param  action An integer representing the action selected.
 	 * @return The newly created node.
 	 */
-	private PolicyNode getNextNode(int action){
+	private MCNode getNextNode(int action){
 		
 		if(state instanceof GameStateScored){
 			GameStateScored newState = tree.game.getSuccessorState((GameStateScored)state, action);
-			return new PolicyNode(newState, depth + 1, tree.game.getActions(newState), tree);
+			return new MCNode(newState, depth + 1, tree.game.getActions(newState), tree);
 		} else{
 			GameState newState = tree.game.getSuccessorState(state, action);
-			return new PolicyNode(newState, depth + 1, tree.game.getActions(newState), tree);
+			return new MCNode(newState, depth + 1, tree.game.getActions(newState), tree);
 		}
 	}
 	
@@ -224,7 +224,7 @@ public class PolicyNode{
 		
 		/** The successor node of the parent after this action is made.
 		 */
-		PolicyNode child;
+		MCNode child;
 		
 		/**
 		 * Constructor for the ActionLink.
@@ -232,7 +232,7 @@ public class PolicyNode{
 		 * @param action An integer representing the action of this link.
 		 * @param child The successor node of the parent after this action is made.
 		 */
-		public ActionLink(int action, PolicyNode child){
+		public ActionLink(int action, MCNode child){
 			this.child = child;
 			this.action = action;
 		}

@@ -9,7 +9,7 @@ import java.math.BigInteger;
  * @since       1.0
  */
 
-public class DotsAndBoxes extends MCTSGame{
+public class DotsAndBoxes extends MCGame{
 	
 	/** The height (in boxes) of the board.
 	 */

@@ -7,7 +7,7 @@ package MCTS;
  * @since       1.0
  */
 
-public abstract class MCTSGame {
+public abstract class MCGame {
 	
 	/**
 	 * Finds all possible actions from a given state.
