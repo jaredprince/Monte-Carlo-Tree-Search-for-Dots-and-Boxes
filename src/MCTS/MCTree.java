@@ -1,5 +1,6 @@
 package MCTS;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -17,7 +18,7 @@ public class MCTree {
 	 * The number of nodes in the tree.
 	 */
 	public int numNodes = 1;
-	
+
 	/**
 	 * The number of nodes that have been removed from the tree.
 	 */
@@ -27,7 +28,7 @@ public class MCTree {
 	 * The combined depth of all nodes in the tree.
 	 */
 	public long totalDepth = 0;
-	
+
 	/**
 	 * The total number of leaves (nodes with no children) on the tree.
 	 */
@@ -120,108 +121,132 @@ public class MCTree {
 	 * 
 	 * @param node
 	 *            The node to be deleted.
-	 *            
+	 * 
 	 * @return The node that was deleted or null.
 	 */
 	public MCNode deleteNode(MCNode node) {
 		node = nodeTable.remove(node.state.getString());
-		
-		if(node != null){
+
+		if (node != null) {
 			numNodes--;
 			node.delinkChildren();
 		}
-	
+
 		return node;
 	}
 
-	
 	/**
-	 * Deletes the node equivalent to the given node and recursively deletes its children.
-	 * The children are only deleted if they do not have other parent nodes.
+	 * Deletes the node equivalent to the given node and recursively deletes its
+	 * children. The children are only deleted if they do not have other parent
+	 * nodes.
 	 * 
-	 * @param node The node to be deleted.
+	 * @param node
+	 *            The node to be deleted.
 	 * @return The number of nodes deleted.
 	 */
-	public int deleteBranch(MCNode node){
+	public int deleteBranch(MCNode node) {
 		int deleted = 0;
 		node = nodeTable.remove(node.state.getString());
-		
-		if(node != null){
+
+		if (node != null) {
 			deleted++;
 			numNodes--;
 			totalDepth -= node.depth;
-			
+
 			node.delinkChildren();
-			
-			if(node.isLeaf){
+
+			if (node.isLeaf) {
 				leaves--;
 			}
-			
+
 			MCNode child;
-			for(int i = 0; i < node.links.length; i++){
+			for (int i = 0; i < node.links.length; i++) {
 				child = node.links[i].child;
-				
-				if(child.parents == 0){
+
+				if (child.parents == 0) {
 					deleted += deleteBranch(child);
 				}
 			}
 		}
-		
+
 		deletedNodes += deleted;
-		
+
 		return deleted;
 	}
-	
+
 	/**
 	 * Merges this tree with another.
 	 * 
-	 * <strong>
-	 * DO NOT merge trees which do not form the same game tree. Roots and games must be equivalent.
-	 * </strong>
+	 * <strong> DO NOT merge trees which do not form the same game tree. Roots
+	 * and games must be equivalent. </strong>
 	 * 
-	 * @param tree The tree with which to merge.
+	 * @param tree
+	 *            The tree with which to merge.
 	 */
-	public void merge(MCTree tree){
+	public void merge(MCTree tree) {
 		maximumDepth = Math.max(maximumDepth, tree.maximumDepth);
-		
-		if(tree.root.equals(root)){
+
+		if (tree.root.equals(root)) {
 			merge(tree, root);
 		}
 	}
-	
+
 	/**
-	 * Recursively merges nodes of this tree with equivalent nodes of the given tree.
+	 * Recursively merges nodes of this tree with equivalent nodes of the given
+	 * tree.
 	 * 
-	 * @param tree The tree with which to merge.
-	 * @param node The node (from this tree) currently being merged.
+	 * @param tree
+	 *            The tree with which to merge.
+	 * @param node
+	 *            The node (from this tree) currently being merged.
 	 */
-	private void merge(MCTree tree, MCNode node){
-		
+	private void merge(MCTree tree, MCNode node) {
+
 	}
-	
+
+	/**
+	 * Gets the nodes along the path currently favored by the tree. Equivalent
+	 * to the player using this tree playing against itself for a game with no
+	 * additional simulations.
+	 * 
+	 * @return The array of nodes along the path.
+	 */
+	public MCNode[] currentPath() {
+		ArrayList<MCNode> path = new ArrayList<MCNode>();
+
+		MCNode currentNode = root;
+		
+		while(currentNode != null){
+			path.add(currentNode);
+			currentNode = currentNode.getNode(currentNode.getNextAction(0), MCNode.BEHAVIOR_DO_NOT_CREATE);
+		}
+		
+		return (MCNode[]) path.toArray();
+	}
+
 	/**
 	 * Updates the data for the tree by iterating through all nodes.
 	 */
-	public void updateTreeData(){
+	public void updateTreeData() {
 		Enumeration<MCNode> nodes = nodeTable.elements();
 		MCNode node;
 		int depth;
-		
-		while(nodes.hasMoreElements()){
+
+		while (nodes.hasMoreElements()) {
 			node = (MCNode) nodes.nextElement();
 			numNodes++;
-			
+
 			depth = node.depth;
 			totalDepth += depth;
-			
-			if(maximumDepth < depth){
+
+			if (maximumDepth < depth) {
 				maximumDepth = depth;
 			}
-			
-			if(node.isLeaf){
+
+			if (node.isLeaf) {
 				leaves++;
 			}
-				
+
 		}
 	}
 }

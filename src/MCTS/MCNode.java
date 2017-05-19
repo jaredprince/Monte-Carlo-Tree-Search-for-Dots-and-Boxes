@@ -45,6 +45,21 @@ public class MCNode {
 	 * True if this node is a leaf (has no children).
 	 */
 	public boolean isLeaf = true;
+	
+	/**
+	 * Defines the behavior in which a node creation is dependent upon NODE_CREATION_COUNT
+	 */
+	public static final int BEHAVIOR_STANDARD = 0;
+	
+	/**
+	 * Defines the behavior in which a node is created (if the node does not exist already), regardless of NODE_CREATION_COUNT
+	 */
+	public static final int BEHAVIOR_CREATE = 1;
+	
+	/**
+	 * Defines the behavior in which a node is not created, regardless of NODE_CREATION_COUNT
+	 */
+	public static final int BEHAVIOR_DO_NOT_CREATE = 2;
 
 	/**
 	 * An array representing the possible moves from this node.
@@ -129,12 +144,12 @@ public class MCNode {
 	 * 
 	 * @param action
 	 *            An integer representing the action to be made.
-	 * @param override
-	 *            True if a child should be added to the tree regardless of the
-	 *            number of times it has been selected.
+	 * @param behavior
+	 *            Defines under which conditions a node is created.
+	 *            
 	 * @return The successor or null.
 	 */
-	public MCNode getNode(int action, boolean override) {
+	public MCNode getNode(int action, int behavior) {
 
 		/* check every action to find the one specified */
 		for (int i = 0; i < links.length; i++) {
@@ -147,7 +162,8 @@ public class MCNode {
 				}
 
 				/* Create a new node */
-				else if (override || links[i].timesChosen == MCTree.NODE_CREATION_COUNT) {
+				else if (behavior == BEHAVIOR_CREATE || 
+						(links[i].timesChosen == MCTree.NODE_CREATION_COUNT && behavior == BEHAVIOR_STANDARD)) {
 
 					MCNode newNode = getNextNode(action);
 					links[i].child = tree.addNode(newNode);

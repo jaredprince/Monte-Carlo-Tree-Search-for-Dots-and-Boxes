@@ -95,6 +95,7 @@ public class DotsAndBoxes extends MCGame{
 		}
 		
 		edges = (height * (width + 1)) + (width * (height + 1));
+		
 		initializeEdgeToBoxMaps();
 	}
 	

@@ -300,8 +300,8 @@ public class MonteCarloTreeSearch {
 			// reversal
 
 			// update the currentNodes
-			currentNode = currentNode.getNode(action, true);
-			currentNode2 = currentNode2.getNode(action, true);
+			currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_CREATE);
+			currentNode2 = currentNode2.getNode(action, MCNode.BEHAVIOR_CREATE);
 
 			/* possibly circumvent the null pointer */
 			if (currentNode == null || currentNode2 == null) {
@@ -443,7 +443,7 @@ public class MonteCarloTreeSearch {
 
 			/* make a move */
 			action = currentNode.getNextAction(c);
-			currentNode = currentNode.getNode(action, false);
+			currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_STANDARD);
 
 			actionsTaken[i] = action;
 
@@ -552,14 +552,14 @@ public class MonteCarloTreeSearch {
 				action = randomPolicy(state);
 
 				if (currentNode != null) {
-					currentNode = currentNode.getNode(action, false);
+					currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_STANDARD);
 				}
 			}
 
 			else {
 				/* get the next node, given c */
 				action = currentNode.getNextAction(c);
-				currentNode = currentNode.getNode(action, false);
+				currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_STANDARD);
 			}
 
 			if (currentNode != null) {

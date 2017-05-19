@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Polygon;
 import javax.swing.JFrame;
 
+@SuppressWarnings("serial")
 public class DotsAndBoxesViewer extends JFrame {
 
 	public int topHeight = getInsets().top;
