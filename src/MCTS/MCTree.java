@@ -1,5 +1,6 @@
 package MCTS;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -148,8 +149,13 @@ public class MCTree {
 		if(node != null){
 			deleted++;
 			numNodes--;
+			totalDepth -= node.depth;
 			
 			node.delinkChildren();
+			
+			if(node.isLeaf){
+				leaves--;
+			}
 			
 			MCNode child;
 			for(int i = 0; i < node.links.length; i++){
@@ -164,5 +170,58 @@ public class MCTree {
 		deletedNodes += deleted;
 		
 		return deleted;
+	}
+	
+	/**
+	 * Merges this tree with another.
+	 * 
+	 * <strong>
+	 * DO NOT merge trees which do not form the same game tree. Roots and games must be equivalent.
+	 * </strong>
+	 * 
+	 * @param tree The tree with which to merge.
+	 */
+	public void merge(MCTree tree){
+		maximumDepth = Math.max(maximumDepth, tree.maximumDepth);
+		
+		if(tree.root.equals(root)){
+			merge(tree, root);
+		}
+	}
+	
+	/**
+	 * Recursively merges nodes of this tree with equivalent nodes of the given tree.
+	 * 
+	 * @param tree The tree with which to merge.
+	 * @param node The node (from this tree) currently being merged.
+	 */
+	private void merge(MCTree tree, MCNode node){
+		
+	}
+	
+	/**
+	 * Updates the data for the tree by iterating through all nodes.
+	 */
+	public void updateTreeData(){
+		Enumeration<MCNode> nodes = nodeTable.elements();
+		MCNode node;
+		int depth;
+		
+		while(nodes.hasMoreElements()){
+			node = (MCNode) nodes.nextElement();
+			numNodes++;
+			
+			depth = node.depth;
+			totalDepth += depth;
+			
+			if(maximumDepth < depth){
+				maximumDepth = depth;
+			}
+			
+			if(node.isLeaf){
+				leaves++;
+			}
+				
+		}
 	}
 }
