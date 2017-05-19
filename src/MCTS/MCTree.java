@@ -11,7 +11,7 @@ import java.util.Hashtable;
  */
 
 public class MCTree {
-	
+
 	/**
 	 * The number of nodes in the tree.
 	 */
@@ -21,7 +21,7 @@ public class MCTree {
 	 * The combined depth of all nodes in the tree.
 	 */
 	public long totalDepth = 0;
-	
+
 	/**
 	 * The depth of the deepest node in the tree.
 	 */
@@ -99,5 +99,20 @@ public class MCTree {
 		}
 
 		return p;
+	}
+
+	/**
+	 * Deletes the node on the tree equivalent to the given node.
+	 * 
+	 * @param node
+	 *            The node to be deleted.
+	 * @return The node that was deleted or null.
+	 */
+	public MCNode deleteNode(MCNode node) {
+		return nodeTable.remove(node.state.getString());
+	}
+	
+	public MCNode deleteBranch(MCNode node){
+		
 	}
 }
