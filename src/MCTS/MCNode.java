@@ -35,6 +35,8 @@ public class MCNode{
 	 */
 	public int parents = 0;
 	
+	public boolean isLeaf = true;
+	
 	/** An array representing the possible moves from this node.
 	 */
 	public ActionLink[] links;
@@ -123,6 +125,11 @@ public class MCNode{
 
 					MCNode newNode = getNextNode(action);
 					links[i].child = tree.addNode(newNode);
+					
+					if(!isLeaf){
+						isLeaf = true;
+						tree.leaves--;
+					}
 					
 					return links[i].child;
 				}

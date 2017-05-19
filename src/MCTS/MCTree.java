@@ -21,6 +21,11 @@ public class MCTree {
 	 * The combined depth of all nodes in the tree.
 	 */
 	public long totalDepth = 0;
+	
+	/**
+	 * The total number of leaves (nodes with no children) on the tree.
+	 */
+	public int leaves = 1;
 
 	/**
 	 * The depth of the deepest node in the tree.
@@ -91,6 +96,7 @@ public class MCTree {
 			p = node;
 			nodeTable.put(p.state.getString(), p);
 			numNodes++;
+			leaves++;
 			totalDepth += node.depth;
 
 			if (p.depth > maximumDepth) {
