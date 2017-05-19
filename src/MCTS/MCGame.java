@@ -19,6 +19,10 @@ public abstract class MCGame {
 	
 	/**
 	 * Gets the successor of a given state.
+	 * <p>
+	 * This is the function called by the MCNode when a new node is created. Because the states in all MCNodes are cast to the 
+	 * superclass (GameState), it is the job of the MCGame to downcast to the subclass, get the successor, and cast back to the 
+	 * superclass before returning (if a subclass is used).
 	 * 
 	 * @param  state The state from which a move is made.
 	 * @param  action An integer representing which move is made.

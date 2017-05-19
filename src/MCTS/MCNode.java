@@ -36,7 +36,7 @@ public class MCNode{
 	public MCTree tree;
 
 	/**
-	 * Constructor for the PolicyNode.
+	 * Constructor for the MCNode.
 	 * 
 	 * @param  state The state represented by this node.
 	 * @param  depth The depth in the tree of this node.

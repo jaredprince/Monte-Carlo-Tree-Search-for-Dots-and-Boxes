@@ -15,12 +15,17 @@ public class MCTree {
 	/**
 	 * The number of nodes in the tree.
 	 */
-	int numNodes = 1;
+	public int numNodes = 1;
 
 	/**
 	 * The combined depth of all nodes in the tree.
 	 */
-	long totalDepth = 0;
+	public long totalDepth = 0;
+	
+	/**
+	 * The depth of the deepest node in the tree.
+	 */
+	public int maximumDepth = 0;
 
 	/**
 	 * The number of times an action must be selected from a node before a
@@ -36,7 +41,7 @@ public class MCTree {
 	/**
 	 * The root node of the tree.
 	 */
-	MCNode root;
+	public MCNode root;
 
 	/**
 	 * The Hashtable which contains all the nodes of the tree with the string
@@ -45,7 +50,7 @@ public class MCTree {
 	private Hashtable<String, MCNode> nodeTable = new Hashtable<String, MCNode>();
 
 	/**
-	 * Constructor for the PolicyNodeTree.
+	 * Constructor for the MCTree.
 	 * 
 	 * @param game
 	 *            MCTSGame to be used by this tree.
@@ -64,8 +69,8 @@ public class MCTree {
 	 * Finds a specific node in the tree.
 	 * 
 	 * @param node
-	 *            PolicyNode equal to the one searched for.
-	 * @return The PolicyNode search for (null if not found).
+	 *            MCNode equal to the one searched for.
+	 * @return The MCNode searched for or null if not found.
 	 */
 	public MCNode findNode(MCNode node) {
 		return nodeTable.get(node.state.getString());
@@ -87,6 +92,10 @@ public class MCTree {
 			nodeTable.put(p.state.getString(), p);
 			numNodes++;
 			totalDepth += node.depth;
+
+			if (p.depth > maximumDepth) {
+				maximumDepth = p.depth;
+			}
 		}
 
 		return p;
