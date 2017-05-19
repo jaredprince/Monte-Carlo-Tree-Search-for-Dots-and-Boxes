@@ -17,7 +17,7 @@ public class GameState {
 	
 	/** The state represented as a BigInteger.
 	 */
-	BigInteger bigState;
+	BigInteger bigState = null;
 	
 	/**
 	 * Constructor using a long.

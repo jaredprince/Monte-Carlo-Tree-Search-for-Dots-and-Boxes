@@ -1,6 +1,5 @@
 package MCTS;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -53,22 +52,22 @@ public class MonteCarloTreeSearch {
 	 *  Index i is an array of the total time taken by player one during turn i (in milliseconds) and the total number of times player one took turn i.
 	 */
 	static long times[][];
-
-	/* The main method.
-	 * 
-	 * @param  width The width (in boxes) of the board.
-	 * @param  height The height (in boxes) of the board.
-	 * @param  c The uncertainty constant for the games.
-	 * @param  matches The number of games to be played.
-	 * @param  simulations The number of simulations taken by each player before they make a move.
-	 * @param  p1_scored True if player one uses scored states, false if player one uses unscored states.
-	 * @param  p1_nonsymmetrical True if player one uses nonsymmetrical states, false if player one uses symmetrical states.
-	 * @param  opponent (1 or 2) 1 denotes that the opponent is another MCTS player. 2 denotes that the opponent is a default player (currently unused).
-	 * @param  p2_scored (Only if opponent is 1) True if player two uses scored states, false if player two uses unscored states.
-	 * @param  p2_nonsymmetrical (Only if opponent is 1) True if player two uses nonsymmetrical states, false if player two uses symmetrical states.
-	 * @param  p2_simulations (Optional) Gives a separate number of simulations per turn for player two.
+	
+	/**
+	 * @param args :
+	 * 	 width The width (in boxes) of the board.
+	 *   height The height (in boxes) of the board.
+	 *   c The uncertainty constant for the games.
+	 *   matches The number of games to be played.
+	 *   simulations The number of simulations taken by each player before they make a move.
+	 *   p1_scored True if player one uses scored states, false if player one uses unscored states.
+	 *   p1_nonsymmetrical True if player one uses nonsymmetrical states, false if player one uses symmetrical states.
+	 *   opponent (1 or 2) 1 denotes that the opponent is another MCTS player. 2 denotes that the opponent is a default player (currently unused).
+	 *   p2_scored (Only if opponent is 1) True if player two uses scored states, false if player two uses unscored states.
+	 *   p2_nonsymmetrical (Only if opponent is 1) True if player two uses nonsymmetrical states, false if player two uses symmetrical states.
+	 *   p2_simulations (Optional) Gives a separate number of simulations per turn for player two.
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		
 		long s = System.currentTimeMillis();
 	
@@ -183,7 +182,7 @@ public class MonteCarloTreeSearch {
 		results[0] = result;
 		results[1] = (double)tree.totalDepth / tree.numNodes;
 		results[2] = tree.numNodes;
-		
+
 		return results;
 	}
 	

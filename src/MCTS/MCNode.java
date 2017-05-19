@@ -66,7 +66,6 @@ public class MCNode{
 	 */
 	public int getNextAction(double c) {
 		
-		
 		/* By default, the links are sorted in order by value + bonus */
 		if(c > 0){
 			return links[0].action;
@@ -75,13 +74,14 @@ public class MCNode{
 		int action = -1;
 		double max = -50;
 		
-		
 		/* find the action with the largest average reward W(s,a) */
 		for(int i = 0; i < links.length; i++){
 	
 			double val = links[i].getValue(false);
 			
-			/* equal actions should be chosen semi-randomly */
+			/* equal actions should be chosen semi-randomly
+			 * apart from the first few times actions are chosen, two values should almost never be equal (the probability 
+			 * of more than two equal values is vanishingly small), so there are assumed to be only ties of two */
 			if(val > max || (val == max && r.nextDouble() < .5)){
 				max = val;
 				action = links[i].action;
