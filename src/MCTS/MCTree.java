@@ -16,6 +16,11 @@ public class MCTree {
 	 * The number of nodes in the tree.
 	 */
 	public int numNodes = 1;
+	
+	/**
+	 * The number of nodes that have been removed from the tree.
+	 */
+	public int deletedNodes = 0;
 
 	/**
 	 * The combined depth of all nodes in the tree.
@@ -118,8 +123,14 @@ public class MCTree {
 	 * @return The node that was deleted or null.
 	 */
 	public MCNode deleteNode(MCNode node) {
-		node.delinkChildren();
-		return nodeTable.remove(node.state.getString());
+		node = nodeTable.remove(node.state.getString());
+		
+		if(node != null){
+			numNodes--;
+			node.delinkChildren();
+		}
+	
+		return node;
 	}
 
 	
@@ -128,19 +139,30 @@ public class MCTree {
 	 * The children are only deleted if they do not have other parent nodes.
 	 * 
 	 * @param node The node to be deleted.
+	 * @return The number of nodes deleted.
 	 */
-	public void deleteBranch(MCNode node){
+	public int deleteBranch(MCNode node){
+		int deleted = 0;
+		node = nodeTable.remove(node.state.getString());
 		
-		node.delinkChildren();
-		nodeTable.remove(node.state.getString());
-		
-		MCNode child;
-		for(int i = 0; i < node.links.length; i++){
-			child = node.links[i].child;
+		if(node != null){
+			deleted++;
+			numNodes--;
 			
-			if(child.parents == 0){
-				deleteBranch(child);
+			node.delinkChildren();
+			
+			MCNode child;
+			for(int i = 0; i < node.links.length; i++){
+				child = node.links[i].child;
+				
+				if(child.parents == 0){
+					deleted += deleteBranch(child);
+				}
 			}
 		}
+		
+		deletedNodes += deleted;
+		
+		return deleted;
 	}
 }

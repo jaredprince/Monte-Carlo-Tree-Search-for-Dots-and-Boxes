@@ -2,10 +2,7 @@ package Visualization;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Polygon;
-
 import javax.swing.JFrame;
 
 public class DotsAndBoxesViewer extends JFrame {
@@ -31,7 +28,7 @@ public class DotsAndBoxesViewer extends JFrame {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, topHeight, 500, 500);
 
-    	paintDots(g);   	
+    	paintDots(g);	
     	paintEdges(g);
     	paintBoxes(g);
     }
@@ -41,7 +38,7 @@ public class DotsAndBoxesViewer extends JFrame {
 	}
 	
 	public void paintEdges(Graphics g){
-
+		
 	}
 
 	public void paintBoxes(Graphics g){
