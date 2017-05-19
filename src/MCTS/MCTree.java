@@ -108,22 +108,33 @@ public class MCTree {
 	 * 
 	 * @param node
 	 *            The node to be deleted.
-	 * @param recursive
-	 *            True if the children of the node should be recursively
-	 *            removed.
+	 *            
 	 * @return The node that was deleted or null.
 	 */
-	public MCNode deleteNode(MCNode node, boolean recursive) {		
-		if(recursive){
-			deleteBranch(node);
-			return nodeTable.get(node.state.getString());
-		}
-		
+	public MCNode deleteNode(MCNode node) {
 		node.delinkChildren();
 		return nodeTable.remove(node.state.getString());
 	}
 
-	private void deleteBranch(MCNode node){
+	
+	/**
+	 * Deletes the node equivalent to the given node and recursively deletes its children.
+	 * The children are only deleted if they do not have other parent nodes.
+	 * 
+	 * @param node The node to be deleted.
+	 */
+	public void deleteBranch(MCNode node){
 		
+		node.delinkChildren();
+		nodeTable.remove(node.state.getString());
+		
+		MCNode child;
+		for(int i = 0; i < node.links.length; i++){
+			child = node.links[i].child;
+			
+			if(child.parents == 0){
+				deleteBranch(child);
+			}
+		}
 	}
 }

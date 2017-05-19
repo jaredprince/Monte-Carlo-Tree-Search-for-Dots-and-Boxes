@@ -218,7 +218,7 @@ public class MCNode{
 	 * @version     1.0
 	 * @since       1.0
 	 */
-	private class ActionLink {
+	public class ActionLink {
 		
 		/** An integer representing the action.
 		 */
