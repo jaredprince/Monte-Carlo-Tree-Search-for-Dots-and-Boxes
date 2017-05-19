@@ -96,6 +96,8 @@ public class MCTree {
 			if (p.depth > maximumDepth) {
 				maximumDepth = p.depth;
 			}
+		} else {
+			p.parents++;
 		}
 
 		return p;
@@ -106,13 +108,22 @@ public class MCTree {
 	 * 
 	 * @param node
 	 *            The node to be deleted.
+	 * @param recursive
+	 *            True if the children of the node should be recursively
+	 *            removed.
 	 * @return The node that was deleted or null.
 	 */
-	public MCNode deleteNode(MCNode node) {
+	public MCNode deleteNode(MCNode node, boolean recursive) {		
+		if(recursive){
+			deleteBranch(node);
+			return nodeTable.get(node.state.getString());
+		}
+		
+		node.delinkChildren();
 		return nodeTable.remove(node.state.getString());
 	}
-	
-	public MCNode deleteBranch(MCNode node){
+
+	private void deleteBranch(MCNode node){
 		
 	}
 }

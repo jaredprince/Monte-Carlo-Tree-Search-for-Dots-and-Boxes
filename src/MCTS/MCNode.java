@@ -27,6 +27,14 @@ public class MCNode{
 	 */
 	public int depth;
 	
+	/** The number of nodes of which this node is a child.
+	 * This is used to delete branches of the tree without 
+	 * removing nodes who are children of other nodes. It is 
+	 * necessary because the nodes are contained in a Hashtable, 
+	 * so just deleting all parents does not destroy the node. 
+	 */
+	public int parents = 0;
+	
 	/** An array representing the possible moves from this node.
 	 */
 	public ActionLink[] links;
@@ -190,6 +198,18 @@ public class MCNode{
 	private MCNode getNextNode(int action){
 		GameState newState = tree.game.getSuccessorState(state, action);
 		return new MCNode(newState, depth + 1, tree.game.getActions(newState), tree);
+	}
+	
+	
+	/**
+	 * Decrements the count of parents for all children of this node.
+	 */
+	public void delinkChildren(){
+		for(int i = 0; i < links.length; i++){
+			if(links[i].child != null){
+				links[i].child.parents--;
+			}
+		}
 	}
 	
 	/**
