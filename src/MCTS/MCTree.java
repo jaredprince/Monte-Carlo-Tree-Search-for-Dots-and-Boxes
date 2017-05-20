@@ -193,7 +193,7 @@ public class MCTree {
 
 	/**
 	 * Recursively merges nodes of this tree with equivalent nodes of the given
-	 * tree.
+	 * tree. This assumes a topological ordering of the nodes.
 	 * 
 	 * @param tree
 	 *            The tree with which to merge.
@@ -201,7 +201,17 @@ public class MCTree {
 	 *            The node (from this tree) currently being merged.
 	 */
 	private void merge(MCTree tree, MCNode node) {
-
+		
+		MCNode child;
+		
+		for(int i = 0; i < node.links.length; i++){
+			child = node.links[i].child;
+			if(child != null){
+				child.mergeNode(tree.findNode(child));
+			}
+		}
+		
+		node.mergeNode(tree.findNode(node));
 	}
 
 	/**

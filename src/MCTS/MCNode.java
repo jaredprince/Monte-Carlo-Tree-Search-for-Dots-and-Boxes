@@ -290,6 +290,10 @@ public class MCNode {
 	 *            The node with which to be merged.
 	 */
 	public void mergeNode(MCNode node) {
+		if(node == null){
+			return;
+		}
+		
 		timesReached += node.timesReached;
 		isLeaf = (isLeaf && node.isLeaf);
 		
