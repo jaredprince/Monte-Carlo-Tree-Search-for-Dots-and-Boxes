@@ -189,6 +189,8 @@ public class MCTree {
 		if (tree.root.equals(root)) {
 			merge(tree, root);
 		}
+		
+		updateTreeData();
 	}
 
 	/**

@@ -125,10 +125,10 @@ public class MCNode {
 			double val = links[i].getValue(false);
 
 			/*
-			 * equal actions should be chosen semi-randomly apart from the first
+			 * Equal actions should be chosen semi-randomly. Apart from the first
 			 * few times actions are chosen, two values should almost never be
-			 * equal (the probability of more than two equal values is
-			 * vanishingly small), so there are assumed to be only ties of two
+			 * equal. The probability of more than two equal values is
+			 * vanishingly small, so there are assumed to be only ties of two.
 			 */
 			if (val > max || (val == max && r.nextDouble() < .5)) {
 				max = val;
