@@ -64,6 +64,58 @@ public class MonteCarloTreeSearch {
 	 * (in milliseconds) and the total number of times player one took turn i.
 	 */
 	static long times[][];
+	
+	/*
+	 * The following constants define the behavior of the search. Variants in the MCTS algorithm are
+	 * selected using these constants.
+	 */
+	
+	/**
+	 * Defines the behavior in which node creation is dependent upon NODE_CREATION_COUNT.
+	 */
+	public static final int BEHAVIOR_EXPANSION_STANDARD = 0;
+	
+	/**
+	 * Defines the behavior in which a node is created (if the node does not exist already), regardless of NODE_CREATION_COUNT.
+	 */
+	public static final int BEHAVIOR_EXPANSION_ALWAYS = 1;
+	
+	/**
+	 * Defines the behavior in which a node is not created, regardless of NODE_CREATION_COUNT.
+	 */
+	public static final int BEHAVIOR_EXPANSION_NEVER = 2;
+	
+	/**
+	 * Defines the behavior in which only a single node in a new branch is created when expanding the tree.
+	 */
+	public static final int BEHAVIOR_EXPANSION_SINGLE = 0;
+	
+	/**
+	 * Defines the behavior in which multiple nodes in a new branch are created when expanding the tree.
+	 */
+	public static final int BEHAVIOR_EXPANSION_MULTIPLE = 1;
+	
+	/**
+	 * Defines the behavior in which all nodes of a new branch are created when expanding the tree.
+	 */
+	public static final int BEHAVIOR_EXPANSION_FULL = 2;
+	
+	/**
+	 * Defines the behavior in which unexplored nodes are selected in the order they are tested, and all are selected before 
+	 * any node is selected a second time.
+	 */
+	public static final int BEHAVIOR_UNEXPLORED_STANDARD = 0;
+	
+	/**
+	 * Defines the behavior in which unexplored nodes are selected using first play urgency (FPU). FPU gives unexplored nodes
+	 * a constant reward value. This value can be tuned to encourage exploitation in the early game.
+	 */
+	public static final int BEHAVIOR_UNEXPLORED_FIRST_PLAY_URGENCY = 1;
+	
+	/**
+	 * Defines the behaviors to be used during this search.
+	 */
+	static int[] behaviors = {BEHAVIOR_EXPANSION_STANDARD, BEHAVIOR_UNEXPLORED_STANDARD};
 
 	/**
 	 * @param args
@@ -300,8 +352,8 @@ public class MonteCarloTreeSearch {
 			// reversal
 
 			// update the currentNodes
-			currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_CREATE);
-			currentNode2 = currentNode2.getNode(action, MCNode.BEHAVIOR_CREATE);
+			currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+			currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
 
 			/* possibly circumvent the null pointer */
 			if (currentNode == null || currentNode2 == null) {
@@ -443,7 +495,7 @@ public class MonteCarloTreeSearch {
 
 			/* make a move */
 			action = currentNode.getNextAction(c);
-			currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_STANDARD);
+			currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_STANDARD);
 
 			actionsTaken[i] = action;
 
@@ -552,14 +604,14 @@ public class MonteCarloTreeSearch {
 				action = randomPolicy(state);
 
 				if (currentNode != null) {
-					currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_STANDARD);
+					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_STANDARD);
 				}
 			}
 
 			else {
 				/* get the next node, given c */
 				action = currentNode.getNextAction(c);
-				currentNode = currentNode.getNode(action, MCNode.BEHAVIOR_STANDARD);
+				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_STANDARD);
 			}
 
 			if (currentNode != null) {

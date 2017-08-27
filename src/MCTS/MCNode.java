@@ -44,23 +44,8 @@ public class MCNode {
 	/**
 	 * True if this node is a leaf (has no children).
 	 */
-	public boolean isLeaf = true;
+	public boolean isLeaf = true;	
 	
-	/**
-	 * Defines the behavior in which a node creation is dependent upon NODE_CREATION_COUNT
-	 */
-	public static final int BEHAVIOR_STANDARD = 0;
-	
-	/**
-	 * Defines the behavior in which a node is created (if the node does not exist already), regardless of NODE_CREATION_COUNT
-	 */
-	public static final int BEHAVIOR_CREATE = 1;
-	
-	/**
-	 * Defines the behavior in which a node is not created, regardless of NODE_CREATION_COUNT
-	 */
-	public static final int BEHAVIOR_DO_NOT_CREATE = 2;
-
 	/**
 	 * An array representing the possible moves from this node.
 	 */
@@ -162,8 +147,8 @@ public class MCNode {
 				}
 
 				/* Create a new node */
-				else if (behavior == BEHAVIOR_CREATE || 
-						(links[i].timesChosen == MCTree.NODE_CREATION_COUNT && behavior == BEHAVIOR_STANDARD)) {
+				else if (behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_ALWAYS || 
+						(links[i].timesChosen == MCTree.NODE_CREATION_COUNT && behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD)) {
 
 					MCNode newNode = getNextNode(action);
 					links[i].child = tree.addNode(newNode);
@@ -183,7 +168,7 @@ public class MCNode {
 
 	/**
 	 * Checks if this node is equivalent to another. For the purpose of this
-	 * method, two nodes are equal is thier states are equal.
+	 * method, two nodes are equal is their states are equal.
 	 * 
 	 * @param p
 	 *            The node to be compared to this one.
@@ -329,7 +314,7 @@ public class MCNode {
 		/**
 		 * The bonus applied to the average u(s, a).
 		 */
-		double bonus = .9999;
+		double bonus = 1;
 
 		/**
 		 * The successor node of the parent after this action is made.

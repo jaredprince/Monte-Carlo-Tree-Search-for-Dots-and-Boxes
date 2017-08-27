@@ -177,8 +177,8 @@ public class MCTree {
 	/**
 	 * Merges this tree with another.
 	 * 
-	 * <strong> DO NOT merge trees which do not form the same game tree. Roots
-	 * and games must be equivalent. </strong>
+	 * <strong> DO NOT merge trees which do not form the same game tree. The roots
+	 * and games of each tree must be equivalent. </strong>
 	 * 
 	 * @param tree
 	 *            The tree with which to merge.
@@ -230,7 +230,7 @@ public class MCTree {
 		
 		while(currentNode != null){
 			path.add(currentNode);
-			currentNode = currentNode.getNode(currentNode.getNextAction(0), MCNode.BEHAVIOR_DO_NOT_CREATE);
+			currentNode = currentNode.getNode(currentNode.getNextAction(0), MonteCarloTreeSearch.BEHAVIOR_EXPANSION_NEVER);
 		}
 		
 		return (MCNode[]) path.toArray();
