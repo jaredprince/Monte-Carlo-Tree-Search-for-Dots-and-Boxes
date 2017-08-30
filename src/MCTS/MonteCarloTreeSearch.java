@@ -66,8 +66,8 @@ public class MonteCarloTreeSearch {
 	static long times[][];
 	
 	/*
-	 * The following constants define the behavior of the search. Variants in the MCTS algorithm are
-	 * selected using these constants.
+	 * The following constants define the behavior of the search. Variations in the MCTS algorithm are
+	 * selected using these constants. All options related to the MCTS algorithm should be defined here.
 	 */
 	
 	/**
@@ -87,28 +87,33 @@ public class MonteCarloTreeSearch {
 	
 	/**
 	 * Defines the behavior in which only a single node in a new branch is created when expanding the tree.
+	 * (Unimplemented)
 	 */
 	public static final int BEHAVIOR_EXPANSION_SINGLE = 0;
 	
 	/**
 	 * Defines the behavior in which multiple nodes in a new branch are created when expanding the tree.
+	 * (Unimplemented)
 	 */
 	public static final int BEHAVIOR_EXPANSION_MULTIPLE = 1;
 	
 	/**
 	 * Defines the behavior in which all nodes of a new branch are created when expanding the tree.
+	 * (Unimplemented)
 	 */
 	public static final int BEHAVIOR_EXPANSION_FULL = 2;
 	
 	/**
 	 * Defines the behavior in which unexplored nodes are selected in the order they are tested, and all are selected before 
 	 * any node is selected a second time.
+	 * (Unimplemented)
 	 */
 	public static final int BEHAVIOR_UNEXPLORED_STANDARD = 0;
 	
 	/**
 	 * Defines the behavior in which unexplored nodes are selected using first play urgency (FPU). FPU gives unexplored nodes
 	 * a constant reward value. This value can be tuned to encourage exploitation in the early game.
+	 * (Unimplemented)
 	 */
 	public static final int BEHAVIOR_UNEXPLORED_FIRST_PLAY_URGENCY = 1;
 	
@@ -348,18 +353,48 @@ public class MonteCarloTreeSearch {
 			// get the point for this move
 			int taken = game.completedBoxesForEdge(action, currentNode.state);
 
-			// function to rotate unsym board to canon and return rotation and
-			// reversal
-
-			// update the currentNodes
-			currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-			currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-
+			
+			
+			
+//			//if both players are symmetrical or both are nonsymmetrical, the same moves are possible for each
+//			if(game.nonsymmetrical == game2.nonsymmetrical){
+				// update the currentNodes
+				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//			}
+//			
+//			//if the player in control is nonsymmetrical, any move they pick is available for the other
+//			else if (playerOneTurn && game.nonsymmetrical) {
+//				// update the currentNodes
+//				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//			} else if (!playerOneTurn && game2.nonsymmetrical) {
+//				// update the currentNodes
+//				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//			}
+//			
+//			//if the player in control is symmetrical, the moves must be translated to a symmetrical one
+//			else {
+//				
+//				//get the next node for the symmetrical player in control
+//				if(playerOneTurn) {
+//					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//					currentNode2 = currentNode2.getNode(currentNode.state, BEHAVIOR_EXPANSION_ALWAYS);
+//				} else {
+//					currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//					currentNode = currentNode.getNode(currentNode2.state, BEHAVIOR_EXPANSION_ALWAYS);
+//				}
+//			}
+			
 			/* possibly circumvent the null pointer */
 			if (currentNode == null || currentNode2 == null) {
-				System.out.println("Null Error: " + currentNode == null ? "Player 1" : "Player 2");
+				System.out.println("Null Error: " + (currentNode == null ? "Player 1" : "Player 2"));
 				return -10;
 			}
+			
+			System.out.println(currentNode.state.getString());
+			System.out.println(currentNode2.state.getString() + "\n");
 
 			if (playerOneTurn) {
 				p1Score += taken;

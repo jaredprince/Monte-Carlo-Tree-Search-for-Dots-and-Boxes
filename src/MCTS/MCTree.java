@@ -138,7 +138,8 @@ public class MCTree {
 	/**
 	 * Deletes the node equivalent to the given node and recursively deletes its
 	 * children. The children are only deleted if they do not have other parent
-	 * nodes.
+	 * nodes. It is necessary to recursively delete the children from the node table
+	 * in order for the garbage collector to collect them.
 	 * 
 	 * @param node
 	 *            The node to be deleted.

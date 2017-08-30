@@ -613,7 +613,6 @@ public class DotsAndBoxes extends MCGame{
 	 * @return The string representation of state after the rotation.
 	 */
 	public String rotate(String state){
-		System.out.println(state);
 		String newState = "";
 		
 		for(int i = 0; i < state.length(); i++){

@@ -165,6 +165,29 @@ public class MCNode {
 
 		return null;
 	}
+	
+	/**
+	 * Gets the successor of this node based on the state given. This will return the nonsymmetrical node whose
+	 * state is equivalent to the given state.
+	 * 
+	 * @param state The state equivalent to the one needed.
+	 * @param behavior Defines under what condition a node is created. 
+	 * @return The successor or null.
+	 * 
+	 */
+	public MCNode getNode(GameState state, int behavior) {
+		
+		/* check every action to find the one specified */
+		for (int i = 0; i < links.length; i++) {
+
+			/* Get the corresponding child */
+			if (links[i].child != null) {
+				
+			}
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Checks if this node is equivalent to another. For the purpose of this
