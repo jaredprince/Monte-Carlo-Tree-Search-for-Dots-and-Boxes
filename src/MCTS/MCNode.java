@@ -44,8 +44,8 @@ public class MCNode {
 	/**
 	 * True if this node is a leaf (has no children).
 	 */
-	public boolean isLeaf = true;	
-	
+	public boolean isLeaf = true;
+
 	/**
 	 * An array representing the possible moves from this node.
 	 */
@@ -110,9 +110,9 @@ public class MCNode {
 			double val = links[i].getValue(false);
 
 			/*
-			 * Equal actions should be chosen semi-randomly. Apart from the first
-			 * few times actions are chosen, two values should almost never be
-			 * equal. The probability of more than two equal values is
+			 * Equal actions should be chosen semi-randomly. Apart from the
+			 * first few times actions are chosen, two values should almost
+			 * never be equal. The probability of more than two equal values is
 			 * vanishingly small, so there are assumed to be only ties of two.
 			 */
 			if (val > max || (val == max && r.nextDouble() < .5)) {
@@ -131,7 +131,7 @@ public class MCNode {
 	 *            An integer representing the action to be made.
 	 * @param behavior
 	 *            Defines under which conditions a node is created.
-	 *            
+	 * 
 	 * @return The successor or null.
 	 */
 	public MCNode getNode(int action, int behavior) {
@@ -147,8 +147,9 @@ public class MCNode {
 				}
 
 				/* Create a new node */
-				else if (behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_ALWAYS || 
-						(links[i].timesChosen == MCTree.NODE_CREATION_COUNT && behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD)) {
+				else if (behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_ALWAYS
+						|| (links[i].timesChosen == MCTree.NODE_CREATION_COUNT
+								&& behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD)) {
 
 					MCNode newNode = getNextNode(action);
 					links[i].child = tree.addNode(newNode);
@@ -165,27 +166,61 @@ public class MCNode {
 
 		return null;
 	}
-	
+
 	/**
-	 * Gets the successor of this node based on the state given. This will return the nonsymmetrical node whose
-	 * state is equivalent to the given state.
+	 * Gets the successor of this node based on the state and action given.
 	 * 
-	 * @param state The state equivalent to the one needed.
-	 * @param behavior Defines under what condition a node is created. 
+	 * @param state
+	 *            The state equivalent to the one needed.
+	 * @param behavior
+	 *            Defines under what condition a node is created.
 	 * @return The successor or null.
 	 * 
 	 */
 	public MCNode getNode(GameState state, int behavior) {
-		
+
+		String canon = ((DotsAndBoxes) tree.game).removeSymmetries(state).getString();
+
 		/* check every action to find the one specified */
 		for (int i = 0; i < links.length; i++) {
 
 			/* Get the corresponding child */
 			if (links[i].child != null) {
-				
+
+				// if the nonsymmetrical state is the same as the canon of the
+				// state given
+				if (links[i].child.state.getString().equals(canon)) {
+					return links[i].child;
+				}
+			}
+
+			else {
+
+				GameState linkState = tree.game.getSuccessorState(state, links[i].action);
+
+				// if the nonsymmetrical state is the same as the canon of the
+				// state given
+				if (((DotsAndBoxes) tree.game).removeSymmetries(linkState).getString().equals(canon)) {
+
+					/* Create a new node */
+					if (behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_ALWAYS
+							|| (links[i].timesChosen == MCTree.NODE_CREATION_COUNT
+									&& behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD)) {
+
+						MCNode newNode = getNextNode(links[i].action);
+						links[i].child = tree.addNode(newNode);
+
+						if (isLeaf) {
+							isLeaf = false;
+							tree.leaves--;
+						}
+
+						return links[i].child;
+					}
+				}
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -229,31 +264,30 @@ public class MCNode {
 		for (int i = 0; i < links.length; i++) {
 			links[i].updateBonus(timesReached, c);
 
-			int t = i;
-
-			/*
-			 * move link up the queue while it's value is greater than the link
-			 * before it
-			 */
-			while (t > 0 && links[t].getValue(true) > links[t - 1].getValue(true)) {
-				ActionLink tempLink = links[t];
-				links[t] = links[t - 1];
-				links[t - 1] = tempLink;
-
-				t--;
-			}
-
-			/*
-			 * move link down the queue while it's value is less than the link
-			 * after it
-			 */
-			while (t < links.length - 1 && links[t].getValue(true) < links[t + 1].getValue(true)) {
-				ActionLink tempLink = links[t];
-				links[t] = links[t + 1];
-				links[t + 1] = tempLink;
-
-				t++;
-			}
+//			int t = i;
+//
+//			/* move link up the queue while it's value is greater than the link
+//			 * before it
+//			 */
+//			while (t > 0 && links[t].getValue(true) > links[t - 1].getValue(true)) {
+//				ActionLink tempLink = links[t];
+//				links[t] = links[t - 1];
+//				links[t - 1] = tempLink;
+//
+//				t--;
+//			}
+//
+//			/*
+//			 * move link down the queue while it's value is less than the link
+//			 * after it
+//			 */
+//			while (t < links.length - 1 && links[t].getValue(true) < links[t + 1].getValue(true)) {
+//				ActionLink tempLink = links[t];
+//				links[t] = links[t + 1];
+//				links[t + 1] = tempLink;
+//
+//				t++;
+//			}
 		}
 	}
 
@@ -298,17 +332,53 @@ public class MCNode {
 	 *            The node with which to be merged.
 	 */
 	public void mergeNode(MCNode node) {
-		if(node == null){
+		if (node == null) {
 			return;
 		}
-		
+
 		timesReached += node.timesReached;
 		isLeaf = (isLeaf && node.isLeaf);
-		
-		for(int i = 0; i < links.length; i++){
+
+		for (int i = 0; i < links.length; i++) {
 			links[i].merge(node.links[i]);
 		}
 	}
+	
+	
+	
+	/*----------------------------------Parallel MCTS-------------------------------------------*/
+	
+	//returns the array of number of times a link was chosed for each action link
+	public int[] getTimesActionChosen() {
+		int[] timesActionChosen = new int[links.length];
+		for(int i=0; i<timesActionChosen.length; i++){
+			timesActionChosen[i]= links[i].getTimesChosen();
+		}
+		return timesActionChosen;
+	}
+	
+	//returns the array of each reward/child average for each action link
+	public double[] getRewards() {
+		double[] rewards = new double[links.length];
+		for(int i=0; i< rewards.length; i++){
+			rewards[i]= links[i].getRewards();
+		}
+		return rewards;
+	}
+	
+	public void setRewards(double[] rewardsToSet){
+		for(int i=0; i<links.length; i++){
+			links[i].rewards= rewardsToSet[i];
+		}
+	}
+	
+	public void setTimesActionChosen(int[] timesActionChosen){
+		for(int i=0; i<links.length; i++){
+			links[i].timesChosen= timesActionChosen[i];
+		}
+	}
+	
+	/*------------------------------------------------------------------------------------------*/
 
 	/**
 	 * Represents a single possible action from the parent node.
@@ -358,6 +428,14 @@ public class MCNode {
 			this.action = action;
 		}
 
+		public double getRewards() {
+			return rewards;
+		}
+
+		public int getTimesChosen() {
+			return timesChosen;
+		}
+
 		/**
 		 * Updates the node with a given reward.
 		 * 
@@ -396,17 +474,18 @@ public class MCNode {
 
 			return (rewards / timesChosen) + (applyBonus ? bonus : 0);
 		}
-		
+
 		/**
 		 * Merges this link with another.
 		 * 
-		 * @param link The link with which to be merged.
+		 * @param link
+		 *            The link with which to be merged.
 		 */
-		public void merge(ActionLink link){
-			if(child == null && link.child != null){
+		public void merge(ActionLink link) {
+			if (child == null && link.child != null) {
 				child = link.child;
 			}
-			
+
 			timesChosen += link.timesChosen;
 			rewards += link.rewards;
 		}
