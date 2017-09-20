@@ -325,63 +325,102 @@ public class DotsAndBoxes extends MCGame{
 		return boxes;
 	}
 	
-	/*// updates the array of fourth edges for almost completed squares
-	public void updateFourthEdges(int edge, GameState state){
-		fourthEdges = new int[edges];
+	public int[][] stateToBoard(GameState state){
+		int[][] board = new int[width][height];
 		
-		String s = state.getBinaryString();
-		
-		int index = 0;
-		
-		for(int i = 0; i < edgeSquares[edge].length; i++){
-			int count = 0;
-			int b;
-			int missingEdgeIndex = 0;
-			int j = edgeSquares[edge][i];
-			
-			
-			for(b = 0; b < boxEdges[j].length; b++){
-				if(s.length() < edges - boxEdges[j][b]){
-					count++;
+		for(int i = 0; i < board.length; i++){
+			for(int b = 0; b < board[0].length; b++){
 				
-					missingEdgeIndex = b;
-					
-					if(count > 1){
-						break;
-					}
-				}
-				
-				else if(s.charAt(boxEdges[j][b] - (edges - s.length())) == '0'){
-					count++;
-					
-					missingEdgeIndex = b;
-					
-					if(count > 1){
-						break;
-					}
-				}
-			}
-			
-			if(count == 1){
-				fourthEdges[index] = boxEdges[j][missingEdgeIndex];
-				index++;
 			}
 		}
 		
-		if(index == 0){
-			fourthEdges = null;
-			return;
-		}
-		
-		int[] temp = new int[index];
-		
-		for(int i = 0; i < temp.length; i++){
-			temp[i] = fourthEdges[i];
-		}
-		
-		fourthEdges = temp;
+		return board;
 	}
-	*/
+	
+	//doesn't yet distinguish loops from chains
+	public int[][] getChainsAndLoops(GameState state){
+		int[][] chainsAndLoops = new int[2][];
+		int[] chains = new int[(width * height) / 2];
+		int[] loops = new int[(width * height) / 2];
+		
+		int board[][] = stateToBoard(state);
+		
+		int cIndex = 0;
+		int lIndex = 0;
+		
+		boolean[][] visited = new boolean[width][height];
+		
+		//get chains
+		for(int i = 0; i < board.length; i++){
+			if(i == 0 || i == board.length - 1){
+				for(int j = 0; j < board[0].length; j++){
+					chains[cIndex] = measureChain(board, visited, i, j);
+				}
+			}
+			
+			else {
+				chains[cIndex] = measureChain(board, visited, i, 0);
+				
+				if(chains[cIndex] != 0)
+					cIndex++;
+				
+				chains[cIndex] = measureChain(board, visited, i, board[0].length - 1);
+				
+				if(chains[cIndex] != 0)
+					cIndex++;
+			}
+		}
+		
+		for(int i = 1; i < board.length - 1; i++){
+			for(int j = 1; j < board[0].length - 1; j++){
+				loops[lIndex] = measureChain(board, visited, i, j);
+			}
+		}
+		
+		chainsAndLoops[0] = chains;
+		chainsAndLoops[1] = loops;
+		
+		return chainsAndLoops;
+	}
+	
+	public int measureChain(int[][] board, boolean[][] visited, int i, int j){
+		/*orientation of free edges: 
+		 * 1 = left, top
+		 * 2 = left, right
+		 * 3 = left, bottom
+		 * 4 = top, right
+		 * 5 = top, bottom
+		 * 6 = right, bottom
+		 */
+		
+		//this prevents recounting
+		if(visited[i][j]){
+			return 0;
+		}
+		
+		//length starts at 1 because of this box
+		int length = 1;
+		visited[i][j] = true;
+		int orientation = board[i][j];
+		
+		if((orientation == 1 || orientation == 2 || orientation == 3) && i > 0){
+			length += measureChain(board, visited, i - 1, j);
+		}
+		
+		if((orientation == 1 || orientation == 4 || orientation == 5) && j > 0){
+			length += measureChain(board, visited, i, j - 1);
+		}
+		
+		if((orientation == 2 || orientation == 4 || orientation == 6) && i < board.length - 1){
+			length += measureChain(board, visited, i + 1, j);
+		}
+		
+		if((orientation == 3 || orientation == 5 || orientation == 6) && j > board[0].length - 1){
+			length += measureChain(board, visited, i, j + 1);
+		}
+		
+		return length;		
+	}
 	
 	/**
 	 * Gets the possible actions for the game from a given state. Each free edge is a possible action. If the game uses asymmetrical states, this method returns only asymmetrical actions.

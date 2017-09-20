@@ -345,55 +345,6 @@ public class MonteCarloTreeSearch {
 		
 		return true;
 	}
-	
-	public int[][] getChainsAndLoops(int[] board){
-		int[][] chainsAndLoops = new int[2][];
-		int[] chains = new int[(width * height) / 2];
-		int[] loops = new int[(width * height) / 2];
-		
-		boolean[][] visited = new boolean[width][height];
-		
-		return chainsAndLoops;
-	}
-	
-	public int measureChain(int[][] board, boolean[][] visited, int i, int j){
-		/*orientation of free edges: 
-		 * 1 = left, top
-		 * 2 = left, right
-		 * 3 = left, bottom
-		 * 4 = top, right
-		 * 5 = top, bottom
-		 * 6 = right, bottom
-		 */
-		
-		//this prevents recounting
-		if(visited[i][j]){
-			return 0;
-		}
-		
-		//length starts at 1 because of this box
-		int length = 1;
-		visited[i][j] = true;
-		int orientation = board[i][j];
-		
-		if((orientation == 1 || orientation == 2 || orientation == 3) && i > 0){
-			length += measureChain(board, visited, i - 1, j);
-		}
-		
-		if((orientation == 1 || orientation == 4 || orientation == 5) && j > 0){
-			length += measureChain(board, visited, i, j - 1);
-		}
-		
-		if((orientation == 2 || orientation == 4 || orientation == 6) && i < board.length - 1){
-			length += measureChain(board, visited, i + 1, j);
-		}
-		
-		if((orientation == 3 || orientation == 5 || orientation == 6) && j > board[0].length - 1){
-			length += measureChain(board, visited, i, j + 1);
-		}
-		
-		return length;		
-	}
 
 	/**
 	 * Plays a number of games between two MCTS players.
