@@ -29,12 +29,7 @@ public class DotsAndBoxes extends MCGame{
 	
 	/** A boolean which is true if the game uses non-symmetrical states and false otherwise.
 	 */
-	public boolean nonsymmetrical;
-	
-	/*
-	public int[] fourthEdges = null;
-	public int[] twoOrThreeEdges = null;
-	*/
+	public boolean asymmetrical;
 	
 	/** A 2D array which lists the box(es) which adjoin a given edge.
 	 *  Position i contains an array of 1 or two integers representing the boxes to which edge i belongs
@@ -46,7 +41,7 @@ public class DotsAndBoxes extends MCGame{
 	 */
 	public int[][] boxEdges;
 	
-	/** A 2D array which maps each edge (in square boards of size 1 - 7) to its position after a single rotation of the board.
+	/** A 2D array which maps each edge (in square boards of size 1 - 9) to its position after a single rotation of the board.
 	 *  Position i contains the map for a square board of size i + 1.
 	 *  Position j in i contains an integer representing the edge which edge j will become after rotation.
 	 */
@@ -63,8 +58,7 @@ public class DotsAndBoxes extends MCGame{
 	};
 	
 	
-	
-	/** A 2D array which maps each edge (in square boards of size 1 - 7) to its position after a reflection of the board.
+	/** A 2D array which maps each edge (in square boards of size 1 - 9) to its position after a reflection of the board.
 	 *  Position i contains the map for a square board of size i + 1.
 	 *  Position j in i contains an integer representing the edge which edge j will become after reflection.
 	 */
@@ -80,6 +74,13 @@ public class DotsAndBoxes extends MCGame{
 		{8,7,6,5,4,3,2,1,0,18,17,16,15,14,13,12,11,10,9,27,26,25,24,23,22,21,20,19,37,36,35,34,33,32,31,30,29,28,46,45,44,43,42,41,40,39,38,56,55,54,53,52,51,50,49,48,47,65,64,63,62,61,60,59,58,57,75,74,73,72,71,70,69,68,67,66,84,83,82,81,80,79,78,77,76,94,93,92,91,90,89,88,87,86,85,103,102,101,100,99,98,97,96,95,113,112,111,110,109,108,107,106,105,104,122,121,120,119,118,117,116,115,114,132,131,130,129,128,127,126,125,124,123,141,140,139,138,137,136,135,134,133,151,150,149,148,147,146,145,144,143,142,160,159,158,157,156,155,154,153,152,170,169,168,167,166,165,164,163,162,161,179,178,177,176,175,174,173,172,171}
 	};
 	
+	/**
+	 * Creates an array representing a map of edges to edges when rotating the board 90 degrees.
+	 * This works only on square boards.
+	 * 
+	 * @param width The width of the board.
+	 * @return The map.
+	 */
 	public static int[] getRotationMap(int width){
 		int[] map = new int[width * (width+1) * 2];
 		
@@ -122,6 +123,13 @@ public class DotsAndBoxes extends MCGame{
 		return map;
 	}
 	
+	/**
+	 * Creates an array representing a map of edges to edges when reflecting the board.
+	 * This works only on square boards.
+	 * 
+	 * @param width The width of the board.
+	 * @return The map.
+	 */
 	public static int[] getReflectionMap(int width){
 		int[] map = new int[width * (width+1) * 2];
 		
@@ -158,18 +166,18 @@ public class DotsAndBoxes extends MCGame{
 	 * @param  height The height (in boxes) of the board.
 	 * @param  width The width (in boxes) of the board.
 	 * @param  scored True if the game uses scored states and false otherwise.
-	 * @param  nonsymmetrical True if the game uses nonsymmetrical states and false otherwise.
+	 * @param  asymmetrical True if the game uses asymmetrical states and false otherwise.
 	 */
-	public DotsAndBoxes(int height, int width, boolean scored, boolean nonsymmetrical){
+	public DotsAndBoxes(int height, int width, boolean scored, boolean asymmetrical){
 		this.height = height;
 		this.width = width;
 		this.scored = scored;
-		this.nonsymmetrical = nonsymmetrical;
+		this.asymmetrical = asymmetrical;
 		this.scored = scored;
 		
-		if(height != width && nonsymmetrical){
+		if(height != width && asymmetrical){
 			System.out.println("Cannot remove symmetries on a rectangular board.");
-			nonsymmetrical = false;
+			asymmetrical = false;
 		}
 		
 		edges = (height * (width + 1)) + (width * (height + 1));
@@ -261,43 +269,60 @@ public class DotsAndBoxes extends MCGame{
 	}
 
 	/**
-	 * Finds the number of completed boxes connected to an edge (assuming the edge is taken).
+	 * Finds the number of boxes connected to the given edge which are complete (assuming the edge is taken).
 	 * 
 	 * @param  edge The edge to check.
 	 * @param  state The state of the board.
-	 * @return The number of completed boxes connected to edge (0 - 2)
+	 * @return The number of boxes connected to edge with n edges (0 - 2)
 	 */
 	public int completedBoxesForEdge(int edge, GameState state){
+		int[] boxes = boxPerEdge(edge, state);
 		
-		int taken = 0;
+		if(boxes.length == 1){
+			return boxes[0] == 4 ? 1 : 0;
+		} else {
+			return boxes[0] == 1 && boxes[1] == 1 ? 2 : boxes[0] == 1 || boxes[1] == 1 ? 1 : 0;
+		}
+	}
+	
+	/**
+	 * Finds the number of edges in each box attached to the given edge (assuming the edge is taken).
+	 * 
+	 * @param edge The edge taken.
+	 * @param state The state of the board.
+	 * @return An array of integers representing the number of edges taken for each of the boxes.
+	 */
+	public int[] boxPerEdge(int edge, GameState state){
+		int[] boxes = new int[edgeBoxes[edge].length];
+		
 		String s = state.getBinaryString();
 		
 		/* check each box attached to the edge */
 		for(int i = 0; i < edgeBoxes[edge].length; i++){			
 			int index = edgeBoxes[edge][i];
-			taken++;
 			
 			/* check each edge of that box */
 			for(int b = 0; b < boxEdges[index].length; b++){
 				
 				/* the given edge is assumed to be taken */
 				if(boxEdges[index][b] == edge){
+					boxes[i]++;
 					continue;
 				}
 				
+				//edge not found
 				if(s.length() < edges - boxEdges[index][b]){
-					taken--;
 					break;
 				}
 				
-				if(s.charAt(boxEdges[index][b] - (edges - s.length())) == '0'){
-					taken--;
+				if(s.charAt(boxEdges[index][b] - (edges - s.length())) == '1'){
+					boxes[i]++;
 					break;
 				}
 			}
 		}
 		
-		return taken;
+		return boxes;
 	}
 	
 	/*// updates the array of fourth edges for almost completed squares
@@ -359,13 +384,13 @@ public class DotsAndBoxes extends MCGame{
 	*/
 	
 	/**
-	 * Gets the possible actions for the game from a given state. Each free edge is a possible action. If the game uses nonsymmetrical states, this method returns only nonsymmetrical actions.
+	 * Gets the possible actions for the game from a given state. Each free edge is a possible action. If the game uses asymmetrical states, this method returns only asymmetrical actions.
 	 * 
 	 * @param  state The state before the move is selected.
 	 * @return An integer array representing all possible moves from the given state.
 	 */
 	public int[] getActions(GameState state) {
-		if(nonsymmetrical){
+		if(asymmetrical){
 			return getActionsSymmetrical(state);
 		} else {
 			return getAllActions(state, edges);
@@ -428,7 +453,7 @@ public class DotsAndBoxes extends MCGame{
 	}
 	
 	/**
-	 * Gets all the possible nonsymmetrical actions from the given state. Each free edge is a possible action. Each nonsymmetrical action leads to a nonsymmetrical state.
+	 * Gets all the possible asymmetrical actions from the given state. Each free edge is a possible action. Each asymmetrical action leads to a asymmetrical state.
 	 * 
 	 * @param  state The state before the move is selected.
 	 * @return An integer array representing all possible moves from the given state.
@@ -525,7 +550,7 @@ public class DotsAndBoxes extends MCGame{
 			returnState = getSimpleSuccessorState(state, action);
 		}
 		
-		if(nonsymmetrical){
+		if(asymmetrical){
 			returnState = removeSymmetries(returnState);
 		}
 		
@@ -563,7 +588,7 @@ public class DotsAndBoxes extends MCGame{
 	}
 	
 	/**
-	 * Gets the nonsymmetrical canonical representation of a given state.
+	 * Gets the asymmetrical canonical representation of a given state.
 	 * 
 	 * @param  state The state to transform.
 	 * @return The canonical representation of state.
@@ -612,7 +637,7 @@ public class DotsAndBoxes extends MCGame{
 	}
 	
 	/**
-	 * Gets the nonsymmetrical canonical representation of a given state.
+	 * Gets the asymmetrical canonical representation of a given state.
 	 * 
 	 * @param  state The state to transform.
 	 * @return The canonical representation of state.
