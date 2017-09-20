@@ -325,12 +325,38 @@ public class DotsAndBoxes extends MCGame{
 		return boxes;
 	}
 	
-	public int[][] stateToBoard(GameState state){
-		int[][] board = new int[width][height];
+	/**
+	 * Creates a 2D array which represents the edges of each box for a given state.
+	 * 
+	 * @param state The state of the board.
+	 * @return A 2D array representing the edges of each box.
+	 */
+	public int[][] stateToBoard(GameState state){		
+		String str = state.getBinaryString();
+		int[] boxes = new int[width * height];
 		
+		int totalEdges = edgeBoxes.length;
+		
+		//add extra leading zeros
+		for(int i = 0; i <= totalEdges - str.length(); i++){
+			str = '0' + str;
+		}
+		
+		//get the orientation of the box
+		for(int i = 0; i < boxes.length; i++){
+			int[] edges = boxEdges[i];
+			
+			boxes[i] = Integer.parseInt("" + str.charAt(edges[0]) + str.charAt(edges[1]) + str.charAt(edges[2]) + str.charAt(edges[3]));
+		}
+		
+		int[][] board = new int[width][height];
+		int index = 0;
+		
+		//change boxes into a 2D array board
 		for(int i = 0; i < board.length; i++){
-			for(int b = 0; b < board[0].length; b++){
-				
+			for(int j = 0; j < board[0].length; j++){
+				board[i][j] = boxes[index];
+				index++;
 			}
 		}
 		
@@ -403,19 +429,19 @@ public class DotsAndBoxes extends MCGame{
 		visited[i][j] = true;
 		int orientation = board[i][j];
 		
-		if((orientation == 1 || orientation == 2 || orientation == 3) && i > 0){
+		if((orientation == 3 || orientation == 9 || orientation == 10) && i > 0){
 			length += measureChain(board, visited, i - 1, j);
 		}
 		
-		if((orientation == 1 || orientation == 4 || orientation == 5) && j > 0){
+		if((orientation == 3 || orientation == 5 || orientation == 6) && j > 0){
 			length += measureChain(board, visited, i, j - 1);
 		}
 		
-		if((orientation == 2 || orientation == 4 || orientation == 6) && i < board.length - 1){
+		if((orientation == 5 || orientation == 9 || orientation == 12) && i < board.length - 1){
 			length += measureChain(board, visited, i + 1, j);
 		}
 		
-		if((orientation == 3 || orientation == 5 || orientation == 6) && j > board[0].length - 1){
+		if((orientation == 6 || orientation == 10 || orientation == 12) && j > board[0].length - 1){
 			length += measureChain(board, visited, i, j + 1);
 		}
 		
