@@ -138,17 +138,22 @@ public class MonteCarloTreeSearch {
 	
 	static int rank;
 	static final boolean TESTPRINT= false;
-	static final int MAXTASKS=2;
+	static int maxTasks=2;
 	/*------------------------------------------------------*/
 
 	/**
 	 * @param args
-	 *            width, height, c, matches, simulations, p1_scored,
-	 *            p1_nonsymmetrical, opponent (1 for MCTS player, 2 for
-	 *            default), p2_scored, p2_nonsymmetrical, p2_simulations
-	 *            (Optional)
+	 *            width, height, c, matches, sims1, scored1,
+	 *            sym1, opponent (1 for MCTS player, 2 for
+	 *            default), parallel
+	 *            
+	 *            If opponent == 1:
+	 *            	scored2, sym2, (sims2)
+	 *            
+	 *            If parallel:
+	 *            	shareInfoEvery, tasks
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) /*throws MPIException*/ {
 
 		
 		long s = System.currentTimeMillis();
@@ -156,7 +161,7 @@ public class MonteCarloTreeSearch {
 		int matches = 0, sims1 = 0, sims2 = 0, opponent = 0;
 		boolean scored1 = false, scored2 = false, sym1 = false, sym2 = false, parallel = false;
 		
-		boolean[] params = new boolean[13];
+		boolean[] params = new boolean[14];
 		
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
@@ -216,6 +221,11 @@ public class MonteCarloTreeSearch {
 			case "shareInfoEvery":
 				shareInfoEvery = Integer.parseInt(arg.substring(index));
 				params[12] = true;
+				break;
+			
+			case "tasks":
+				maxTasks = Integer.parseInt(arg.substring(index));
+				params[13] = true;
 				break;
 			}
 		}
@@ -281,6 +291,9 @@ public class MonteCarloTreeSearch {
 				if(!params[12]){
 					System.out.println("Missing Parameter: shareInfoEvery");
 				}
+				if(!params[13]){
+					System.out.println("Missing Parameter: tasks");
+				}
 			}
 		}
 		
@@ -295,17 +308,17 @@ public class MonteCarloTreeSearch {
 		game = new DotsAndBoxes(height, width, scored1, sym1);
 		
 		if(parallel){
-			game2 = new DotsAndBoxes(height, width, scored1, sym1);
-			
-//			if(MAXTASKS>1){
+//			game2 = new DotsAndBoxes(height, width, scored1, sym1);
+//			
+//			if(maxTasks>1){
 //				MPI.Init(args);
 //				rank = MPI.COMM_WORLD.getRank();
-//				competition(tree, game, tree2, game2, sims1/MAXTASKS, sims2/MAXTASKS, matches);
+//				competitionParallel(tree, game, tree2, game2, sims1/maxTasks, sims2/maxTasks, matches);
 //				MPI.Finalize();
 //			}
 //			else{
 //				rank=-1;
-//				competition(tree, game, tree2, game2, sims1, sims2, matches);
+//				competitionParallel(tree, game, tree2, game2, sims1, sims2, matches);
 //			}
 		} else {
 			if(opponent == 1){
@@ -318,6 +331,29 @@ public class MonteCarloTreeSearch {
 
 		System.out.println(System.currentTimeMillis() - s);
 
+	}
+	
+	/**
+	 * 
+	 * @param state The current state of the game. 
+	 * @param controllerNetScore The net score for the player currently in control.
+	 * @return True if the player in control wins, false otherwise.
+	 */
+	public boolean endgame(GameState state, int controllerNetScore){
+		
+		
+		
+		return true;
+	}
+	
+	public int[][] getChainsAndLoops(int[] board){
+		int[][] chainsAndLoops = new int[2][];
+		int[] chains = new int[(width * height) / 2];
+		int[] loops = new int[(width * height) / 2];
+		
+		
+		
+		return chainsAndLoops;
 	}
 
 	/**
@@ -339,8 +375,7 @@ public class MonteCarloTreeSearch {
 	 *            The number of games to be played.
 	 */
 	public static void competition(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2,
-			int simulationsPerTurn1, int simulationsPerTurn2, int matches) {
-
+			int simulationsPerTurn1, int simulationsPerTurn2, int matches) /*throws MPIException*/ {
 		int wins = 0;
 		int losses = 0;
 		int draws = 0;
@@ -367,8 +402,8 @@ public class MonteCarloTreeSearch {
 		/* Results */
 		System.out.println(height + "x" + width + " c=" + c + " matches=" + matches + " sims=" + simulationsPerTurn1
 				+ "," + simulationsPerTurn2 + " p1=" + (game.scored ? "sc+" : "nsc+")
-				+ (game.nonsymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+")
-				+ (game2.nonsymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
+				+ (game.asymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+")
+				+ (game2.asymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
 		System.out.println("Average nodes: " + totalNodes / matches);
 		System.out.println("average depth: " + (totalAveDepth / matches) + "\nAverage Time: ");
 
@@ -396,11 +431,12 @@ public class MonteCarloTreeSearch {
 	 *            The number of simulations given to player one.
 	 * @param simulationsPerTurn2
 	 *            The number of simulations given to player two.
+	 * @param parallel True if the tree is parallelized.
 	 * @return An array of the form {result, average depth of the final tree for
 	 *         player one, number of nodes in the final tree for player one}.
 	 */
 	public static double[] match(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2,
-			int simulationsPerTurn1, int simulationsPerTurn2, boolean parallel) {
+			int simulationsPerTurn1, int simulationsPerTurn2, boolean parallel) /*throws MPIException*/ {
 
 		tree = game.scored ? new MCTree(game, new GameStateScored(0, 0)) : new MCTree(game, new GameState(0));
 		tree2 = game2.scored ? new MCTree(game2, new GameStateScored(0, 0)) : new MCTree(game2, new GameState(0));
@@ -414,8 +450,9 @@ public class MonteCarloTreeSearch {
 		 * restarted.
 		 */
 		while (result == -10) {
-			if(parallel);
+			if(parallel){
 //				result = testGameParallel(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
+			}
 			else
 				result = testGame(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
 		}
@@ -465,6 +502,15 @@ public class MonteCarloTreeSearch {
 		boolean playerOneTurn = true;
 		int p1Score = 0;
 		int p2Score = 0;
+		
+		//the number of boxes that are completed or have two edges
+		int twoOrFour = 0;
+		
+		//board[i] is the number of taken edges for box i
+		int[] board = new int[width * height];
+		
+		//a clone to pass to the simulate method
+		int[] boardClone = new int[width * height];
 
 		// for every turn
 		while (!currentNode.state.equals(terminalState)) {
@@ -482,7 +528,7 @@ public class MonteCarloTreeSearch {
 				// perform the simulations for this move
 				while (sims > 0) {
 					// give player one's game, tree, node, and score
-					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game);
+					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game, boardClone, twoOrFour);
 					sims--;
 				}
 
@@ -501,32 +547,42 @@ public class MonteCarloTreeSearch {
 				// perform the simulations for this move
 				while (sims > 0) {
 					// give player two's game, tree, node, and score
-					simulate(currentNode2.state, p2Score - p1Score, currentNode2, terminalState, tree2, game2);
+					simulate(currentNode2.state, p2Score - p1Score, currentNode2, terminalState, tree2, game2, boardClone, twoOrFour);
 					sims--;
 				}
 
 				action = currentNode2.getNextAction(0);
 			}
-
-			// get the point for this move
-			int taken = game.completedBoxesForEdge(action, currentNode.state);
-
 			
+			// get the points for this move
+			int taken = 0;
 			
+			// increment the edges for each box which adjoins action
+			for(int i = 0; i < game.edgeBoxes.length; i++){
+				board[game.edgeBoxes[action][i]]++;
+				boardClone[game.edgeBoxes[action][i]]++;
+				
+				if(board[game.edgeBoxes[action][i]] == 4){
+					taken++;
+					twoOrFour++;
+				} else if (board[game.edgeBoxes[action][i]] == 2){
+					twoOrFour++;
+				}
+			}			
 			
-			//if both players are symmetrical or both are nonsymmetrical, the same moves are possible for each
-			if(game.nonsymmetrical == game2.nonsymmetrical){
+			//if both players are symmetrical or both are asymmetrical, the same moves are possible for each
+			if(game.asymmetrical == game2.asymmetrical){
 				// update the currentNodes
 				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
 				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
 			}
 			
-			//if the player in control is nonsymmetrical, translate
-			else if (playerOneTurn && game.nonsymmetrical) {
+			//if the player in control is asymmetrical, translate
+			else if (playerOneTurn && game.asymmetrical) {
 				// update the currentNodes
 				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
 				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-			} else if (!playerOneTurn && game2.nonsymmetrical) {
+			} else if (!playerOneTurn && game2.asymmetrical) {
 				// update the currentNodes
 				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
 				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
@@ -554,13 +610,11 @@ public class MonteCarloTreeSearch {
 				return -10;
 			}
 			
+			//catch errors between symmetrical and asymmetrical players
 			if(!game.removeSymmetries(currentNode.state).equals(game2.removeSymmetries(currentNode2.state))){
 				System.out.println("Move Error: " + (playerOneTurn ? "Player 1" : "Player 2"));
 				return -10;
 			}
-			
-//			System.out.println(currentNode.state.getString() + " - " + currentNode.state.getBinaryString());
-//			System.out.println(currentNode2.state.getString() + " - " + currentNode2.state.getBinaryString() + "\n");
 
 			if (playerOneTurn) {
 				p1Score += taken;
@@ -674,9 +728,10 @@ public class MonteCarloTreeSearch {
 	 * @param game
 	 *            The game to be used. This game should belong to the player
 	 *            running the simulation.
+	 * @param board An array representing the number of edges taken for each box.
 	 */
 	public static void simulate(GameState state, int p1Net, MCNode pastNode, GameState terminalState, MCTree tree,
-			DotsAndBoxes game) {
+			DotsAndBoxes game, int[] board, int twoOrFour) {
 		boolean playerOne = true;
 
 		int action = 0;
@@ -705,16 +760,27 @@ public class MonteCarloTreeSearch {
 				state = terminalState;
 				break;
 			}
-
-			int taken = game.completedBoxesForEdge(action, state);
+			
+			int taken = 0;
+			
+			// increment the edges for each box which adjoins action
+			for(int b = 0; b < game.edgeBoxes.length; b++){
+				board[game.edgeBoxes[action][b]]++;
+				
+				if(board[game.edgeBoxes[action][b]] == 4){
+					taken++;
+					twoOrFour++;
+				} else if(board[game.edgeBoxes[action][b]] == 2){
+					twoOrFour++;
+				}
+			}
 
 			if (currentNode != null) {
 				state = currentNode.state;
 			}
 
 			else {
-				/*
-				 * this turns a scored state to unscored, but since it just
+				/* this turns a scored state to unscored, but since it just
 				 * feeds into simulateDefault, it doesn't matter
 				 */
 				state = game.getSuccessorState(state, action);
@@ -830,7 +896,7 @@ public class MonteCarloTreeSearch {
 	}
 	
 	/*-----------------------------------Parallel MCTS----------------------------------------------*/
-	
+//	
 //	public static MCNode doStuff(MCNode currNode) throws MPIException{
 //		int currNodeNumActions= DotsAndBoxes.getAllActions(currNode.state, edges).length;
 //		MCNode toReturn = currNode;
@@ -858,8 +924,8 @@ public class MonteCarloTreeSearch {
 //		//arrays for the master node
 //		
 //		//long arrays to store info from each compute node
-//		nToGather= new int[(currNodeNumActions*MAXTASKS)];//(currNodeNumActions *MAXTASKS)];
-//		rToGather = new double[(currNodeNumActions*MAXTASKS)];//(currNodeNumActions * MAXTASKS)];
+//		nToGather= new int[(currNodeNumActions*maxTasks)];//(currNodeNumActions *maxTasks)];
+//		rToGather = new double[(currNodeNumActions*maxTasks)];//(currNodeNumActions * maxTasks)];
 //		
 //		//these will be broadcasted by the master node to the compute nodes
 //		rSum= new double[currNodeNumActions];
@@ -1082,7 +1148,7 @@ public class MonteCarloTreeSearch {
 //				while(sims > 0){
 //					//give player one's game, tree, node, and score
 //					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game);
-//					if(MAXTASKS>1){
+//					if(maxTasks>1){
 //						if(sims< simulationsPerTurn1 && sims%shareInfoEvery ==0 ){
 //							try{
 //								doStuff(currentNode);
@@ -1128,7 +1194,7 @@ public class MonteCarloTreeSearch {
 //				action = currentNode2.getNextAction(0);
 //			}
 //			
-//			if(MAXTASKS>1){
+//			if(maxTasks>1){
 //				if(rank==0){
 //
 //					int[] tempAction= {action};
@@ -1147,7 +1213,7 @@ public class MonteCarloTreeSearch {
 //				//get the point for this move
 //				System.out.println ("rank " + rank + " about to determine score with action state " + action + " " + currentNode.state.longState);
 //			}
-//			int taken = game.completedBoxesForEdge(action, currentNode.state);
+//			int taken = game.completedBoxesForEdge(action, currentNode.state, 4);
 //			if(TESTPRINT){
 //				System.out.println ("rank " + rank + " after " + i + " moves taken = "  + taken);
 //			}
@@ -1214,14 +1280,14 @@ public class MonteCarloTreeSearch {
 //		}
 //		
 //		/* Results */
-//		System.out.println(height + "x" + width + " c=" + c + " matches=" + matches + " sims=" + simulationsPerTurn1 + "," + simulationsPerTurn2 + " p1=" + (game.scored ? "sc+" : "nsc+") + (game.nonsymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+") + (game2.nonsymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
+//		System.out.println(height + "x" + width + " c=" + c + " matches=" + matches + " sims=" + simulationsPerTurn1 + "," + simulationsPerTurn2 + " p1=" + (game.scored ? "sc+" : "nsc+") + (game.asymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+") + (game2.asymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
 //		System.out.println("nodes: " + totalNodes / matches);
 //		System.out.println("average depth: " + (totalAveDepth / matches));
 //		
 //		printAveTime("Average Times RANK "+rank, times);
 //		printNumTime("Number of Times Chosen "+rank, times);
 //	}
-	
-	
+//	
+//	
 	/*----------------------------------------------------------------------------------------------*/
 }
