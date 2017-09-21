@@ -281,7 +281,7 @@ public class DotsAndBoxes extends MCGame{
 		if(boxes.length == 1){
 			return boxes[0] == 4 ? 1 : 0;
 		} else {
-			return boxes[0] == 1 && boxes[1] == 1 ? 2 : boxes[0] == 1 || boxes[1] == 1 ? 1 : 0;
+			return boxes[0] + boxes[1];
 		}
 	}
 	
@@ -336,17 +336,18 @@ public class DotsAndBoxes extends MCGame{
 		int[] boxes = new int[width * height];
 		
 		int totalEdges = edgeBoxes.length;
+		int length = str.length();
 		
 		//add extra leading zeros
-		for(int i = 0; i <= totalEdges - str.length(); i++){
+		for(int i = 0; i < totalEdges - length; i++){
 			str = '0' + str;
 		}
 		
-		//get the orientation of the box
+		//get the orientation of the box as an integer
 		for(int i = 0; i < boxes.length; i++){
 			int[] edges = boxEdges[i];
 			
-			boxes[i] = Integer.parseInt("" + str.charAt(edges[0]) + str.charAt(edges[1]) + str.charAt(edges[2]) + str.charAt(edges[3]));
+			boxes[i] = Integer.parseInt("" + str.charAt(edges[0]) + str.charAt(edges[1]) + str.charAt(edges[2]) + str.charAt(edges[3]), 2);
 		}
 		
 		int[][] board = new int[width][height];
@@ -355,7 +356,7 @@ public class DotsAndBoxes extends MCGame{
 		//change boxes into a 2D array board
 		for(int i = 0; i < board.length; i++){
 			for(int j = 0; j < board[0].length; j++){
-				board[i][j] = boxes[index];
+				board[j][i] = boxes[index];
 				index++;
 			}
 		}
@@ -363,11 +364,18 @@ public class DotsAndBoxes extends MCGame{
 		return board;
 	}
 	
-	//doesn't yet distinguish loops from chains
-	public int[][] getChainsAndLoops(GameState state){
+	/**
+	 * Finds the number and length of all loops and chains on the board.
+	 * 
+	 * @param state The state of the board.
+	 * @param width The width of the board (in boxes).
+	 * @param height The height of the board (in boxes).
+	 * @return A 2D array or all the chains and loops on a board.
+	 */
+	public int[][] getChainsAndLoops(GameState state, int width, int height){
 		int[][] chainsAndLoops = new int[2][];
 		int[] chains = new int[(width * height) / 2];
-		int[] loops = new int[(width * height) / 2];
+		int[] loops = new int[(width * height) / 4];
 		
 		int board[][] = stateToBoard(state);
 		
@@ -375,31 +383,24 @@ public class DotsAndBoxes extends MCGame{
 		int lIndex = 0;
 		
 		boolean[][] visited = new boolean[width][height];
+		int length = 0;
 		
-		//get chains
+		//check every square
 		for(int i = 0; i < board.length; i++){
-			if(i == 0 || i == board.length - 1){
-				for(int j = 0; j < board[0].length; j++){
-					chains[cIndex] = measureChain(board, visited, i, j);
+			for(int j = 0; j < board[0].length; j++){
+				
+				//if it's unvisited, measure the chain
+				if(!visited[i][j]){
+					length = measureChain(board, visited, i, j, 0);
+					
+					if(length < 0){
+						loops[lIndex] = -length;
+						lIndex++;
+					} else {
+						chains[cIndex] = length;
+						cIndex++;
+					}
 				}
-			}
-			
-			else {
-				chains[cIndex] = measureChain(board, visited, i, 0);
-				
-				if(chains[cIndex] != 0)
-					cIndex++;
-				
-				chains[cIndex] = measureChain(board, visited, i, board[0].length - 1);
-				
-				if(chains[cIndex] != 0)
-					cIndex++;
-			}
-		}
-		
-		for(int i = 1; i < board.length - 1; i++){
-			for(int j = 1; j < board[0].length - 1; j++){
-				loops[lIndex] = measureChain(board, visited, i, j);
 			}
 		}
 		
@@ -409,43 +410,57 @@ public class DotsAndBoxes extends MCGame{
 		return chainsAndLoops;
 	}
 	
-	public int measureChain(int[][] board, boolean[][] visited, int i, int j){
-		/*orientation of free edges: 
-		 * 1 = left, top
-		 * 2 = left, right
-		 * 3 = left, bottom
-		 * 4 = top, right
-		 * 5 = top, bottom
-		 * 6 = right, bottom
-		 */
+	/**
+	 * Measures the length of the chain or loop of which the given box is a part.
+	 * Assumes the box is a part of a chain or loop.
+	 * 
+	 * @param board A 2D array representing the edges in each box on the board. @see stateToBoard
+	 * @param visited A 2D array representing whether each box on the board has been counted already.
+	 * @param i The column index of the box.
+	 * @param j The row index of the box.
+	 * @param depth The depth in the search. Should be called with '0'.
+	 * @return The length of the chain or loop of which the box is a part. Negative values signify the box is part of a loop.
+	 */
+	public int measureChain(int[][] board, boolean[][] visited, int i, int j, int depth){
 		
 		//this prevents recounting
 		if(visited[i][j]){
 			return 0;
 		}
 		
-		//length starts at 1 because of this box
-		int length = 1;
 		visited[i][j] = true;
 		int orientation = board[i][j];
 		
+		int[] lengths = new int[2];
+		int index = 0;
+		
 		if((orientation == 3 || orientation == 9 || orientation == 10) && i > 0){
-			length += measureChain(board, visited, i - 1, j);
+			lengths[index] += measureChain(board, visited, i - 1, j, depth + 1);
+			index++;
 		}
 		
 		if((orientation == 3 || orientation == 5 || orientation == 6) && j > 0){
-			length += measureChain(board, visited, i, j - 1);
+			lengths[index] += measureChain(board, visited, i, j - 1, depth + 1);
+			index++;
 		}
 		
 		if((orientation == 5 || orientation == 9 || orientation == 12) && i < board.length - 1){
-			length += measureChain(board, visited, i + 1, j);
+			lengths[index] += measureChain(board, visited, i + 1, j, depth + 1);
+			index++;
 		}
 		
-		if((orientation == 6 || orientation == 10 || orientation == 12) && j > board[0].length - 1){
-			length += measureChain(board, visited, i, j + 1);
+		if((orientation == 6 || orientation == 10 || orientation == 12) && j < board[0].length - 1){
+			lengths[index] += measureChain(board, visited, i, j + 1, depth + 1);
+			index++;
 		}
 		
-		return length;		
+		//if this is the first level and two sides were checked and one of the
+		//sides was already visited, return a negative to signify a loop
+		if(depth == 0 && index == 2 && (lengths[1] == 0 || lengths[0] == 0)){
+			return -(lengths[0] + 1);
+		}
+		
+		return lengths[0] + lengths[1] + 1;		
 	}
 	
 	/**
