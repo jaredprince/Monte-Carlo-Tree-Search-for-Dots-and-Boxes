@@ -410,6 +410,27 @@ public class DotsAndBoxes extends MCGame{
 		return chainsAndLoops;
 	}
 	
+	public int[] measureIntersection(int[][] board, boolean[][] visited, int i, int j, int depth){
+		int[] result = new int[2];
+		
+		//this prevents recounting
+		if(visited[i][j]){
+			return result;
+		}
+		
+		int orientation = board[i][j];
+		
+		//this is a 3-way intersection
+		if(orientation == 1 || orientation == 2 || orientation == 4 || orientation == 8){
+			
+		}
+		
+//		if(orientation == )
+		
+		
+		return result;
+	}
+	
 	/**
 	 * Measures the length of the chain or loop of which the given box is a part.
 	 * Assumes the box is a part of a chain or loop.
