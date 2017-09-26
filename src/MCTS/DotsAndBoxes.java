@@ -411,22 +411,43 @@ public class DotsAndBoxes extends MCGame{
 	}
 	
 	public int[] measureIntersection(int[][] board, boolean[][] visited, int i, int j, int depth){
-		int[] result = new int[2];
-		
-		//this prevents recounting
-		if(visited[i][j]){
-			return result;
-		}
+		int[] result;
+		int index = 0;
 		
 		int orientation = board[i][j];
 		
+		visited[i][j] = true;
+		
 		//this is a 3-way intersection
 		if(orientation == 1 || orientation == 2 || orientation == 4 || orientation == 8){
-			
+			result = new int[2];
+		} else {
+			result = new int[3];
 		}
 		
-//		if(orientation == )
+		//left
+		if((orientation == 0 || orientation == 1 || orientation == 2 || orientation == 8) && i > 0){
+			result[index] = measureChain(board, visited, i - 1, j, 0);
+			index++;
+		}
 		
+		//top
+		if((orientation == 0 || orientation == 1 || orientation == 2 || orientation == 4) && j > 0){
+			result[index] = measureChain(board, visited, i, j - 1, 0);
+			index++;
+		}
+		
+		//right
+		if((orientation == 0 || orientation == 1 || orientation == 4 || orientation == 8) && i < board.length - 1){
+			result[index] = measureChain(board, visited, i + 1, j, 0);
+			index++;
+		}
+		
+		//bottom
+		if((orientation == 0 || orientation == 2 || orientation == 4 || orientation == 8) && j < board[0].length - 1){
+			result[index] = measureChain(board, visited, i - 1, j + 1, 0);
+			index++;
+		}
 		
 		return result;
 	}
@@ -449,27 +470,37 @@ public class DotsAndBoxes extends MCGame{
 			return 0;
 		}
 		
-		visited[i][j] = true;
 		int orientation = board[i][j];
+		
+		//stop if this is an intersection
+		if((orientation == 0 || orientation == 1 || orientation == 2 || orientation == 4 || orientation == 8)){
+			return 0;
+		}
+		
+		visited[i][j] = true;
 		
 		int[] lengths = new int[2];
 		int index = 0;
 		
+		//left
 		if((orientation == 3 || orientation == 9 || orientation == 10) && i > 0){
 			lengths[index] += measureChain(board, visited, i - 1, j, depth + 1);
 			index++;
 		}
 		
+		//top
 		if((orientation == 3 || orientation == 5 || orientation == 6) && j > 0){
 			lengths[index] += measureChain(board, visited, i, j - 1, depth + 1);
 			index++;
 		}
 		
+		//right
 		if((orientation == 5 || orientation == 9 || orientation == 12) && i < board.length - 1){
 			lengths[index] += measureChain(board, visited, i + 1, j, depth + 1);
 			index++;
 		}
 		
+		//bottom
 		if((orientation == 6 || orientation == 10 || orientation == 12) && j < board[0].length - 1){
 			lengths[index] += measureChain(board, visited, i, j + 1, depth + 1);
 			index++;
