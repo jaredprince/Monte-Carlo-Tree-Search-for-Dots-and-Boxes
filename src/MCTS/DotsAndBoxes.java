@@ -8,6 +8,12 @@ import java.util.Arrays;
  * @author      Jared Prince
  * @version     1.0
  * @since       1.0
+ * 
+ * 9/26/17:
+ * Added methods to get a rotation or reflection map for a given board size.
+ * Added a method to turn a state into a 2D array representing the state of each box in the board.
+ * Added methods to measure chains, loops, and intersections and return arrays of loops and chains.
+ * Added a method to give the number of taken edges for each box.
  */
 
 public class DotsAndBoxes extends MCGame{
@@ -386,10 +392,9 @@ public class DotsAndBoxes extends MCGame{
 		boolean[][] visited = new boolean[width][height];
 		int length = 0;
 		
-		//check every square
+		//check every square for intersections
 		for(int i = 0; i < board.length; i++){
 			for(int j = 0; j < board[0].length; j++){
-				
 				//if it's unvisited, measure the chain
 				if(!visited[i][j]){
 					int orientation = board[i][j];
@@ -406,11 +411,21 @@ public class DotsAndBoxes extends MCGame{
 						}
 						
 						//combine the last two chains
-						chains[cIndex] = intersection[intersection.length] + intersection[intersection.length - 1] + 1;
+						chains[cIndex] = intersection[intersection.length - 1] + intersection[intersection.length - 2] + 1;
 						cIndex++;
 					}
+				}
+			}
+		}
+		
+		//check every square
+		for(int i = 0; i < board.length; i++){
+			for(int j = 0; j < board[0].length; j++){
+				
+				//if it's unvisited, measure the chain
+				if(!visited[i][j]){
 					
-					length = measureChain(board, visited, i, j, 0);
+					length = measureChain(board, visited, i, j, 0, false);
 					
 					if(length < 0){
 						loops[lIndex] = -length;
@@ -439,32 +454,32 @@ public class DotsAndBoxes extends MCGame{
 		
 		//this is a 3-way intersection
 		if(orientation == 1 || orientation == 2 || orientation == 4 || orientation == 8){
-			result = new int[2];
-		} else {
 			result = new int[3];
+		} else {
+			result = new int[4];
 		}
 		
 		//left
 		if((orientation == 0 || orientation == 1 || orientation == 2 || orientation == 8) && i > 0){
-			result[index] = measureChain(board, visited, i - 1, j, 0);
+			result[index] = measureChain(board, visited, i - 1, j, 0, true);
 			index++;
 		}
 		
 		//top
 		if((orientation == 0 || orientation == 1 || orientation == 2 || orientation == 4) && j > 0){
-			result[index] = measureChain(board, visited, i, j - 1, 0);
+			result[index] = measureChain(board, visited, i, j - 1, 0, true);
 			index++;
 		}
 		
 		//right
 		if((orientation == 0 || orientation == 1 || orientation == 4 || orientation == 8) && i < board.length - 1){
-			result[index] = measureChain(board, visited, i + 1, j, 0);
+			result[index] = measureChain(board, visited, i + 1, j, 0, true);
 			index++;
 		}
 		
 		//bottom
 		if((orientation == 0 || orientation == 2 || orientation == 4 || orientation == 8) && j < board[0].length - 1){
-			result[index] = measureChain(board, visited, i - 1, j + 1, 0);
+			result[index] = measureChain(board, visited, i, j + 1, 0, true);
 			index++;
 		}
 		
@@ -480,9 +495,10 @@ public class DotsAndBoxes extends MCGame{
 	 * @param i The column index of the box.
 	 * @param j The row index of the box.
 	 * @param depth The depth in the search. Should be called with '0'.
+	 * @param intersection True if the given chain is part of an intersection.
 	 * @return The length of the chain or loop of which the box is a part. Negative values signify the box is part of a loop.
 	 */
-	public int measureChain(int[][] board, boolean[][] visited, int i, int j, int depth){
+	public int measureChain(int[][] board, boolean[][] visited, int i, int j, int depth, boolean intersection){
 		
 		//this prevents recounting
 		if(visited[i][j]){
@@ -503,31 +519,32 @@ public class DotsAndBoxes extends MCGame{
 		
 		//left
 		if((orientation == 3 || orientation == 9 || orientation == 10) && i > 0){
-			lengths[index] += measureChain(board, visited, i - 1, j, depth + 1);
+			lengths[index] += measureChain(board, visited, i - 1, j, depth + 1, intersection);
 			index++;
 		}
 		
 		//top
 		if((orientation == 3 || orientation == 5 || orientation == 6) && j > 0){
-			lengths[index] += measureChain(board, visited, i, j - 1, depth + 1);
+			lengths[index] += measureChain(board, visited, i, j - 1, depth + 1, intersection);
 			index++;
 		}
 		
 		//right
 		if((orientation == 5 || orientation == 9 || orientation == 12) && i < board.length - 1){
-			lengths[index] += measureChain(board, visited, i + 1, j, depth + 1);
+			lengths[index] += measureChain(board, visited, i + 1, j, depth + 1, intersection);
 			index++;
 		}
 		
 		//bottom
 		if((orientation == 6 || orientation == 10 || orientation == 12) && j < board[0].length - 1){
-			lengths[index] += measureChain(board, visited, i, j + 1, depth + 1);
+			lengths[index] += measureChain(board, visited, i, j + 1, depth + 1, intersection);
 			index++;
 		}
 		
 		//if this is the first level and two sides were checked and one of the
 		//sides was already visited, return a negative to signify a loop
-		if(depth == 0 && index == 2 && (lengths[1] == 0 || lengths[0] == 0)){
+		//does not happen when this is an intersection chain
+		if(depth == 0 && index == 2 && (lengths[1] == 0 || lengths[0] == 0) && !intersection){
 			return -(lengths[0] + 1);
 		}
 		
