@@ -507,6 +507,11 @@ public class DotsAndBoxes extends MCGame{
 		
 		int orientation = board[i][j];
 		
+		//don't measure finished squares
+		if(orientation == 15){
+			return 0;
+		}
+		
 		//stop if this is an intersection
 		if((orientation == 0 || orientation == 1 || orientation == 2 || orientation == 4 || orientation == 8)){
 			return 0;
