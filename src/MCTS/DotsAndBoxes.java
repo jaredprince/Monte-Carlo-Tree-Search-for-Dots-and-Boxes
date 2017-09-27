@@ -1,6 +1,7 @@
 package MCTS;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 /**
  * A Dots and Boxes MCTSGame.
@@ -391,6 +392,24 @@ public class DotsAndBoxes extends MCGame{
 				
 				//if it's unvisited, measure the chain
 				if(!visited[i][j]){
+					int orientation = board[i][j];
+					
+					//this is an intersection
+					if((orientation == 0 || orientation == 1 || orientation == 2 || orientation == 4 || orientation == 8)){
+						int[] intersection = measureIntersection(board, visited, i, j, 0);
+						
+						Arrays.sort(intersection);
+						
+						for(int b = 0; b < intersection.length - 2; b++){
+							chains[cIndex] = intersection[b];
+							cIndex++;
+						}
+						
+						//combine the last two chains
+						chains[cIndex] = intersection[intersection.length] + intersection[intersection.length - 1] + 1;
+						cIndex++;
+					}
+					
 					length = measureChain(board, visited, i, j, 0);
 					
 					if(length < 0){
