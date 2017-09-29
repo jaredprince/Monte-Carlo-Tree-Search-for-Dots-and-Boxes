@@ -187,7 +187,7 @@ public class MCNode {
 			/* Get the corresponding child */
 			if (links[i].child != null) {
 
-				// if the nonsymmetrical state is the same as the canon of the
+				// if the asymmetrical state is the same as the canon of the
 				// state given
 				if (links[i].child.state.getString().equals(canon)) {
 					return links[i].child;
@@ -264,30 +264,39 @@ public class MCNode {
 		for (int i = 0; i < links.length; i++) {
 			links[i].updateBonus(timesReached, c);
 
-//			int t = i;
-//
-//			/* move link up the queue while it's value is greater than the link
-//			 * before it
-//			 */
-//			while (t > 0 && links[t].getValue(true) > links[t - 1].getValue(true)) {
-//				ActionLink tempLink = links[t];
-//				links[t] = links[t - 1];
-//				links[t - 1] = tempLink;
-//
-//				t--;
-//			}
-//
-//			/*
-//			 * move link down the queue while it's value is less than the link
-//			 * after it
-//			 */
-//			while (t < links.length - 1 && links[t].getValue(true) < links[t + 1].getValue(true)) {
-//				ActionLink tempLink = links[t];
-//				links[t] = links[t + 1];
-//				links[t + 1] = tempLink;
-//
-//				t++;
-//			}
+//			sortLink(links, i);
+		}
+	}
+	
+	/**
+	 * Sorts an updated value into an already sorted array starting with its current index.
+	 * 
+	 * @param links The array being sorted.
+	 * @param i The index of the element to sort.
+	 */
+	public static void sortLink(ActionLink[] links, int i){
+
+		/* move link up the queue while it's value is greater than the link
+		 * before it
+		 */
+		while (i > 0 && links[i].getValue(true) > links[i - 1].getValue(true)) {
+			ActionLink tempLink = links[i];
+			links[i] = links[i - 1];
+			links[i - 1] = tempLink;
+
+			i--;
+		}
+
+		/*
+		 * move link down the queue while it's value is less than the link
+		 * after it
+		 */
+		while (i < links.length - 1 && links[i].getValue(true) < links[i + 1].getValue(true)) {
+			ActionLink tempLink = links[i];
+			links[i] = links[i + 1];
+			links[i + 1] = tempLink;
+
+			i++;
 		}
 	}
 
@@ -348,7 +357,7 @@ public class MCNode {
 	
 	/*----------------------------------Parallel MCTS-------------------------------------------*/
 	
-	//returns the array of number of times a link was chosed for each action link
+	//returns the array of number of times a link was chosen for each action link
 	public int[] getTimesActionChosen() {
 		int[] timesActionChosen = new int[links.length];
 		for(int i=0; i<timesActionChosen.length; i++){

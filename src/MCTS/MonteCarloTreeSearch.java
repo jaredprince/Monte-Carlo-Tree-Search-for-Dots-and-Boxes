@@ -154,7 +154,6 @@ public class MonteCarloTreeSearch {
 	 *            	shareInfoEvery, tasks
 	 */
 	public static void main(String[] args) /*throws MPIException*/ {
-
 		
 		long s = System.currentTimeMillis();
 		
@@ -306,6 +305,7 @@ public class MonteCarloTreeSearch {
 		edges = (height * (width + 1)) + (width * (height + 1));
 		times = new long[edges][2];
 		game = new DotsAndBoxes(height, width, scored1, sym1);
+		
 		
 		if(parallel){
 //			game2 = new DotsAndBoxes(height, width, scored1, sym1);
@@ -548,7 +548,7 @@ public class MonteCarloTreeSearch {
 			int taken = 0;
 			
 			// increment the edges for each box which adjoins action
-			for(int i = 0; i < game.edgeBoxes.length; i++){
+			for(int i = 0; i < game.edgeBoxes[action].length; i++){
 				board[game.edgeBoxes[action][i]]++;
 				boardClone[game.edgeBoxes[action][i]]++;
 				
@@ -719,6 +719,7 @@ public class MonteCarloTreeSearch {
 	 *            The game to be used. This game should belong to the player
 	 *            running the simulation.
 	 * @param board An array representing the number of edges taken for each box.
+	 * @param twoOrFour The number of boxes which have either 2 or 4 edges.
 	 */
 	public static void simulate(GameState state, int p1Net, MCNode pastNode, GameState terminalState, MCTree tree,
 			DotsAndBoxes game, int[] board, int twoOrFour) {
@@ -754,7 +755,7 @@ public class MonteCarloTreeSearch {
 			int taken = 0;
 			
 			// increment the edges for each box which adjoins action
-			for(int b = 0; b < game.edgeBoxes.length; b++){
+			for(int b = 0; b < game.edgeBoxes[action].length; b++){
 				board[game.edgeBoxes[action][b]]++;
 				
 				if(board[game.edgeBoxes[action][b]] == 4){
@@ -886,7 +887,7 @@ public class MonteCarloTreeSearch {
 	}
 	
 	/*-----------------------------------Parallel MCTS----------------------------------------------*/
-//	
+	
 //	public static MCNode doStuff(MCNode currNode) throws MPIException{
 //		int currNodeNumActions= DotsAndBoxes.getAllActions(currNode.state, edges).length;
 //		MCNode toReturn = currNode;
@@ -1121,6 +1122,15 @@ public class MonteCarloTreeSearch {
 //		int p1Score = 0;
 //		int p2Score = 0;
 //		
+//		//the number of boxes that are completed or have two edges
+//		int twoOrFour = 0;
+//		
+//		//board[i] is the number of taken edges for box i
+//		int[] board = new int[width * height];
+//		
+//		//a clone to pass to the simulate method
+//		int[] boardClone = new int[width * height];
+//		
 //		//for every turn
 //		while(!currentNode.state.equals(terminalState)){
 //			int i=0;
@@ -1137,7 +1147,7 @@ public class MonteCarloTreeSearch {
 //				//perform the simulations for this move
 //				while(sims > 0){
 //					//give player one's game, tree, node, and score
-//					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game);
+//					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game, boardClone, twoOrFour);
 //					if(maxTasks>1){
 //						if(sims< simulationsPerTurn1 && sims%shareInfoEvery ==0 ){
 //							try{
@@ -1156,8 +1166,6 @@ public class MonteCarloTreeSearch {
 //
 //						}	
 //					}
-//
-//					
 //					
 //					sims--;
 //				}
@@ -1177,11 +1185,27 @@ public class MonteCarloTreeSearch {
 //				//perform the simulations for this move
 //				while(sims > 0){
 //					//give player two's game, tree, node, and score
-//					simulate(currentNode2.state, p2Score - p1Score, currentNode2, terminalState, tree2, game2);
+//					simulate(currentNode2.state, p2Score - p1Score, currentNode2, terminalState, tree2, game2, boardClone, twoOrFour);
 //					sims--;
 //				}
 //				
 //				action = currentNode2.getNextAction(0);
+//			}
+//			
+//			// get the points for this move
+//			int taken = 0;
+//			
+//			// increment the edges for each box which adjoins action
+//			for(int b = 0; b < game.edgeBoxes[action].length; b++){
+//				board[game.edgeBoxes[action][b]]++;
+//				boardClone[game.edgeBoxes[action][b]]++;
+//				
+//				if(board[game.edgeBoxes[action][b]] == 4){
+//					taken++;
+//					twoOrFour++;
+//				} else if (board[game.edgeBoxes[action][b]] == 2){
+//					twoOrFour++;
+//				}
 //			}
 //			
 //			if(maxTasks>1){
@@ -1203,7 +1227,7 @@ public class MonteCarloTreeSearch {
 //				//get the point for this move
 //				System.out.println ("rank " + rank + " about to determine score with action state " + action + " " + currentNode.state.longState);
 //			}
-//			int taken = game.completedBoxesForEdge(action, currentNode.state, 4);
+//			
 //			if(TESTPRINT){
 //				System.out.println ("rank " + rank + " after " + i + " moves taken = "  + taken);
 //			}
