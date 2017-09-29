@@ -308,18 +308,18 @@ public class MonteCarloTreeSearch {
 		
 		
 		if(parallel){
-//			game2 = new DotsAndBoxes(height, width, scored1, sym1);
-//			
-//			if(maxTasks>1){
-//				MPI.Init(args);
-//				rank = MPI.COMM_WORLD.getRank();
-//				competitionParallel(tree, game, tree2, game2, sims1/maxTasks, sims2/maxTasks, matches);
-//				MPI.Finalize();
-//			}
-//			else{
-//				rank=-1;
-//				competitionParallel(tree, game, tree2, game2, sims1, sims2, matches);
-//			}
+			game2 = new DotsAndBoxes(height, width, scored1, sym1);
+			
+			if(maxTasks>1){
+				MPI.Init(args);
+				rank = MPI.COMM_WORLD.getRank();
+				competitionParallel(tree, game, tree2, game2, sims1/maxTasks, sims2/maxTasks, matches);
+				MPI.Finalize();
+			}
+			else{
+				rank=-1;
+				competitionParallel(tree, game, tree2, game2, sims1, sims2, matches);
+			}
 		} else {
 			if(opponent == 1){
 				game2 = new DotsAndBoxes(height, width, scored2, sym2);
@@ -365,7 +365,7 @@ public class MonteCarloTreeSearch {
 	 *            The number of games to be played.
 	 */
 	public static void competition(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2,
-			int simulationsPerTurn1, int simulationsPerTurn2, int matches) /*throws MPIException*/ {
+			int simulationsPerTurn1, int simulationsPerTurn2, int matches) throws MPIException {
 		int wins = 0;
 		int losses = 0;
 		int draws = 0;
@@ -426,7 +426,7 @@ public class MonteCarloTreeSearch {
 	 *         player one, number of nodes in the final tree for player one}.
 	 */
 	public static double[] match(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2,
-			int simulationsPerTurn1, int simulationsPerTurn2, boolean parallel) /*throws MPIException*/ {
+			int simulationsPerTurn1, int simulationsPerTurn2, boolean parallel) throws MPIException {
 
 		tree = game.scored ? new MCTree(game, new GameStateScored(0, 0)) : new MCTree(game, new GameState(0));
 		tree2 = game2.scored ? new MCTree(game2, new GameStateScored(0, 0)) : new MCTree(game2, new GameState(0));
@@ -441,7 +441,7 @@ public class MonteCarloTreeSearch {
 		 */
 		while (result == -10) {
 			if(parallel){
-//				result = testGameParallel(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
+				result = testGameParallel(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
 			}
 			else
 				result = testGame(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
@@ -888,420 +888,419 @@ public class MonteCarloTreeSearch {
 	
 	/*-----------------------------------Parallel MCTS----------------------------------------------*/
 	
-//	public static MCNode doStuff(MCNode currNode) throws MPIException{
-//		int currNodeNumActions= DotsAndBoxes.getAllActions(currNode.state, edges).length;
-//		MCNode toReturn = currNode;
-//		
-//		//arrays for each compute node
-//		int[] nCompute;
-//		double[] rCompute;
-//		double[] rToRecieve;
-//		int[] nToRecieve;
-//		//double[] wCompute;
-//		//arrays for the master node
-//		double[] rToBcast;
-//		int[] nToGather;
-//		double [] rToGather;
-//		
-//		double[] rSum;
-//		int[] nSum;
-//		
-//		//arrays for each compute node
-//		nCompute= currNode.getTimesActionChosen();
-//		rCompute= currNode.getRewards();
-//		//wCompute= new double[currNodeNumActions];
-//		rToRecieve= new double[currNodeNumActions];
-//		nToRecieve= new int[currNodeNumActions];
-//		//arrays for the master node
-//		
-//		//long arrays to store info from each compute node
-//		nToGather= new int[(currNodeNumActions*maxTasks)];//(currNodeNumActions *maxTasks)];
-//		rToGather = new double[(currNodeNumActions*maxTasks)];//(currNodeNumActions * maxTasks)];
-//		
-//		//these will be broadcasted by the master node to the compute nodes
-//		rSum= new double[currNodeNumActions];
-//		nSum= new int[currNodeNumActions];
-//		
-//		//qToBcast= fillWithDummy(qToBcast, -99);
-//		//nToGather= fillWithDummy(nToGather, -99);
-//		//wToGather= fillWithDummy(wToGather, -99);
-//		//wSum= fillWithDummy(wSum, -99);
-//		//nSum= fillWithDummy(nSum, -99);
-//		
-//		
-//		
-//		if(TESTPRINT){
-//			if(rank==0){
-//				System.out.println("number of actions to be gathered "+nToGather.length);
-//			}
-//
-//			//print information from each non-master node
-//			//	if(rank!=0){
-//			System.out.println("rank "+rank+" BEFORE GATHER");
-//			System.out.println("rank " + rank + " number of possible actions "+currNodeNumActions);
-//			//System.out.print ("rank " + rank + " times action chosen BEFORE ");
-//			printArr("rank " + rank + " times action chosen BEFORE ", nCompute);
-//			//System.out.print ("rank " + rank + " BEFORE child averages ");
-//			printArr("rank " + rank + " BEFORE rewards ",rCompute);
+	public static MCNode doStuff(MCNode currNode) throws MPIException {
+		int currNodeNumActions= DotsAndBoxes.getAllActions(currNode.state, edges).length;
+		MCNode toReturn = currNode;
+		
+		//arrays for each compute node
+		int[] nCompute;
+		double[] rCompute;
+		double[] rToRecieve;
+		int[] nToRecieve;
+		//double[] wCompute;
+		//arrays for the master node
+		double[] rToBcast;
+		int[] nToGather;
+		double [] rToGather;
+		
+		double[] rSum;
+		int[] nSum;
+		
+		//arrays for each compute node
+		nCompute= currNode.getTimesActionChosen();
+		rCompute= currNode.getRewards();
+		//wCompute= new double[currNodeNumActions];
+		rToRecieve= new double[currNodeNumActions];
+		nToRecieve= new int[currNodeNumActions];
+		//arrays for the master node
+		
+		//long arrays to store info from each compute node
+		nToGather= new int[(currNodeNumActions*maxTasks)];//(currNodeNumActions *maxTasks)];
+		rToGather = new double[(currNodeNumActions*maxTasks)];//(currNodeNumActions * maxTasks)];
+		
+		//these will be broadcasted by the master node to the compute nodes
+		rSum= new double[currNodeNumActions];
+		nSum= new int[currNodeNumActions];
+		
+		//qToBcast= fillWithDummy(qToBcast, -99);
+		//nToGather= fillWithDummy(nToGather, -99);
+		//wToGather= fillWithDummy(wToGather, -99);
+		//wSum= fillWithDummy(wSum, -99);
+		//nSum= fillWithDummy(nSum, -99);
+		
+		
+		
+		if(TESTPRINT){
+			if(rank==0){
+				System.out.println("number of actions to be gathered "+nToGather.length);
+			}
+
+			//print information from each non-master node
+			//	if(rank!=0){
+			System.out.println("rank "+rank+" BEFORE GATHER");
+			System.out.println("rank " + rank + " number of possible actions "+currNodeNumActions);
+			//System.out.print ("rank " + rank + " times action chosen BEFORE ");
+			printArr("rank " + rank + " times action chosen BEFORE ", nCompute);
+			//System.out.print ("rank " + rank + " BEFORE child averages ");
+			printArr("rank " + rank + " BEFORE rewards ",rCompute);
+		}
+		
+	//	}
+		
+		
+//		try{
+			MPI.COMM_WORLD.gather(nCompute, currNodeNumActions, MPI.INT, nToGather, currNodeNumActions, MPI.INT, 0);
+			
+			MPI.COMM_WORLD.barrier();
+			if(TESTPRINT){
+				System.out.println (" after barrier rank = " + rank);
+			}
 //		}
-//		
-//	//	}
-//		
-//		
-////		try{
-//			MPI.COMM_WORLD.gather(nCompute, currNodeNumActions, MPI.INT, nToGather, currNodeNumActions, MPI.INT, 0);
-//			
-//			MPI.COMM_WORLD.barrier();
-//			if(TESTPRINT){
-//				System.out.println (" after barrier rank = " + rank);
-//			}
-////		}
-////		catch(Exception e){
-//			// display the rank, the exception message (if any) and the
-//			// stacktrace
-////			System.out.println("crashed on first gather");
-////			System.out.println(" rank " + rank + " " + e.getMessage());
-////			e.printStackTrace();
-//
-//		// abort processing
-////			MPI.COMM_WORLD.abort(1);
-////		}
-////		try{
-//			MPI.COMM_WORLD.gather(rCompute, currNodeNumActions, MPI.DOUBLE, rToGather, currNodeNumActions, MPI.DOUBLE, 0);
-////		}
-////		catch(Exception e){
-////			System.out.println("crashed on second gather");
-////			System.out.println(" rank " + rank + " " + e.getMessage());
-////			e.printStackTrace();
-//			
-////			MPI.COMM_WORLD.abort(1);
-////		}
-//		if(rank==0 ){
-//			nSum= sumWithin(nToGather, currNodeNumActions);
-//			rSum= sumWithin(rToGather, currNodeNumActions);
-//			
-//			if(TESTPRINT){
-//				System.out.println("rank "+rank+" AFTER GATHER BEFORE BCAST ");
-//				//System.out.print("rank "+rank+" nSum AFTER ");
-//				printArr("rank "+rank+" nSum AFTER ", nSum);
-//				//System.out.print("rank "+rank+" wSum  AFTER ");
-//				printArr("rank "+rank+" wSum  AFTER ",rSum);
-//			}
-//			
-//			MPI.COMM_WORLD.bcast(rSum, currNodeNumActions, MPI.DOUBLE, 0);
-//			MPI.COMM_WORLD.bcast(nSum, currNodeNumActions, MPI.INT, 0);
+//		catch(Exception e){
+			// display the rank, the exception message (if any) and the
+			// stacktrace
+//			System.out.println("crashed on first gather");
+//			System.out.println(" rank " + rank + " " + e.getMessage());
+//			e.printStackTrace();
+
+		// abort processing
+//			MPI.COMM_WORLD.abort(1);
 //		}
-//		if(rank!= 0){
-//			
-//			MPI.COMM_WORLD.bcast(rToRecieve, currNodeNumActions, MPI.DOUBLE, 0);
-//			MPI.COMM_WORLD.bcast(nToRecieve, currNodeNumActions, MPI.INT, 0);
-//			toReturn.setRewards(rToRecieve);
-//			toReturn.setTimesActionChosen(nToRecieve);
-//			
-//			if(TESTPRINT){
-//				System.out.print("rank "+rank+" AFTER BCAST");
-//				//System.out.print("rank "+rank+" what q was recieved: AFTER");
-//				printArr("rank "+rank+" what q was recieved: AFTER",rToRecieve);
-//				//System.out.print("rank "+rank+" what n was received: AFTER");
-//				printArr("rank "+rank+" what n was received: AFTER",nToRecieve);
-//				//System.out.print("rank "+rank+" current node's child averages:AFTER ");
-//				printArr("rank "+rank+" current node's rewards:AFTER ", toReturn.getRewards());
-//				//System.out.print("rank "+rank+" current node's TAC: ");
-//				printArr("rank "+rank+" current node's TAC: ",toReturn.getTimesActionChosen());
-//			}
+//		try{
+			MPI.COMM_WORLD.gather(rCompute, currNodeNumActions, MPI.DOUBLE, rToGather, currNodeNumActions, MPI.DOUBLE, 0);
 //		}
-//		return toReturn;
-//		
-//	}
-//	
-//	//prints the contents of the array
-//	public static void printArr(String res,int[] arr){
-//		for(int i=0; i<arr.length; i++){
-//			res= res+ arr[i]+" ";
+//		catch(Exception e){
+//			System.out.println("crashed on second gather");
+//			System.out.println(" rank " + rank + " " + e.getMessage());
+//			e.printStackTrace();
+			
+//			MPI.COMM_WORLD.abort(1);
 //		}
-//		System.out.println(res);
-//	}
-//	public static void printArr(String res, double[] arr){
-//		for(int i=0; i<arr.length; i++){
-//			res= res+ arr[i]+" ";
-//			//System.out.print(arr[i]+" ");
-//		}
-//		System.out.println(res);
-//	}
-//	//arrays must be the same length, multipies them together
-//	public static double[] arrayMultiply(int[] arr1, double[] arr2){
-//		double[] product = new double[arr1.length];
-//		for(int i=0; i<arr1.length; i++){
-//			product[i]=(arr1[i]*arr2[i]);
-//		}
-//		return product;
-//	}
-//
-//	//kind of sums an array
-//	public static double[] sumWithin(double[] arr, int num){
-//		double[] sum= new double[num];
-//		for(int i=0; i< arr.length; i++ ){
-//			sum[i%num] += arr[i];
-//		}
-//
-//		return sum;
-//	}
-//
-//	public static int[] sumWithin(int[] arr, int num){
-//		int[] sum= new int[num];
-//		for(int i=0; i< arr.length; i++ ){
-//			sum[i%num] += arr[i];
-//		}
-//
-//		return sum;
-//	}
-//
-//	//divides two arrays by index
-//	public static double[] arrayDivide(int[] arr1, double[] arr2){
-//		double[] result = new double[arr1.length];
-//		for(int i=0; i<arr1.length; i++){
-//			result[i]=(arr2[i]/arr1[i]);
-//		}
-//		return result;
-//	}
-//
-//	public static void printAveTime(String res, long[][] arr){
-//		String printStr="";
-//		printStr+=res;
-//		
-//		for(int i = 0; i < arr.length; i++){
-//			if(arr[i][1] == 0){
-//				continue;
-//			}
-//			
-//			printStr+=" Move " + i + ": " + arr[i][0] / (double)arr[i][1];
-//		}
-//		System.out.println(printStr);
-//	}
-//	
-//	public static void printNumTime(String res, long[][] arr){
-//		String printStr="";
-//		
-//		printStr+=res;
-//		for(int i=0; i<times.length; i++){
-//			printStr+=" Move "+i+": "+arr[i][1];
-//		}
-//		System.out.println(printStr);
-//	}
-//		
-//	
-//	/**
-//	 * Plays a single game between two MCTS players.
-//	 * 
-//	 * @param  tree The tree for player one.
-//	 * @param  game The game for player one.
-//	 * @param  tree2 The tree for player two.
-//	 * @param  game2 The game for player two.
-//	 * @param  simulationsPerTurn1 The number of simulations given to player one.
-//	 * @param  simulationsPerTurn2 The number of simulations given to player two.
-//	 * @return An integer representing the result for player one.
-//	 */
-//	public static int testGameParallel(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2) throws MPIException{
-//		
-//		GameState terminalState = null;
-//		
-//		if(edges > 60){
-//			terminalState = new GameState(new BigInteger("2").pow(edges).subtract(new BigInteger("1")));
-//		} 
-//		else{
-//			terminalState = new GameState((long) Math.pow(2, edges) - 1);
-//		}
-//		
-//		//the current node of each tree
-//		MCNode currentNode = tree.root;
-//		MCNode currentNode2 = tree2.root;
-//		
-//		//the game variables
-//		int action = 0;
-//		boolean playerOneTurn = true;
-//		int p1Score = 0;
-//		int p2Score = 0;
-//		
-//		//the number of boxes that are completed or have two edges
-//		int twoOrFour = 0;
-//		
-//		//board[i] is the number of taken edges for box i
-//		int[] board = new int[width * height];
-//		
-//		//a clone to pass to the simulate method
-//		int[] boardClone = new int[width * height];
-//		
-//		//for every turn
-//		while(!currentNode.state.equals(terminalState)){
-//			int i=0;
-//			if(p1Score > (width*width) / 2 || p2Score > (width*width) / 2){
-//				break;
-//			}
-//			
-//			int sims = playerOneTurn ? simulationsPerTurn1 : simulationsPerTurn2;
-//			
-//			//get the action based on the current player
-//			if(playerOneTurn){
-//				long start = System.nanoTime();
-//				
-//				//perform the simulations for this move
-//				while(sims > 0){
-//					//give player one's game, tree, node, and score
-//					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game, boardClone, twoOrFour);
-//					if(maxTasks>1){
-//						if(sims< simulationsPerTurn1 && sims%shareInfoEvery ==0 ){
-//							try{
-//								doStuff(currentNode);
-//							}
-//							catch(Exception e){
-//								// display the rank, the exception message (if any) and the
-//								// stacktrace
-//
-//								System.out.println(" rank " + rank + " crashed " + e.getMessage());
-//								e.printStackTrace();
-//
-//								// abort processing
-//								//MPI.COMM_WORLD.abort(1);
-//							}
-//
-//						}	
-//					}
-//					
-//					sims--;
-//				}
-//				
-//				long end = System.nanoTime();
-//				
-//				try{
-//					times[currentNode.depth][1]++;
-//					times[currentNode.depth][0] = times[currentNode.depth][0] + (end - start);
-//				} catch (ArrayIndexOutOfBoundsException e) {
-//					System.out.println("Array Index Error");
-//					return -10;
-//				}
-//				
-//				action = currentNode.getNextAction(0);
-//			} else {
-//				//perform the simulations for this move
-//				while(sims > 0){
-//					//give player two's game, tree, node, and score
-//					simulate(currentNode2.state, p2Score - p1Score, currentNode2, terminalState, tree2, game2, boardClone, twoOrFour);
-//					sims--;
-//				}
-//				
-//				action = currentNode2.getNextAction(0);
-//			}
-//			
-//			// get the points for this move
-//			int taken = 0;
-//			
-//			// increment the edges for each box which adjoins action
-//			for(int b = 0; b < game.edgeBoxes[action].length; b++){
-//				board[game.edgeBoxes[action][b]]++;
-//				boardClone[game.edgeBoxes[action][b]]++;
-//				
-//				if(board[game.edgeBoxes[action][b]] == 4){
-//					taken++;
-//					twoOrFour++;
-//				} else if (board[game.edgeBoxes[action][b]] == 2){
-//					twoOrFour++;
-//				}
-//			}
-//			
-//			if(maxTasks>1){
-//				if(rank==0){
-//
-//					int[] tempAction= {action};
-//					MPI.COMM_WORLD.bcast(tempAction, 1, MPI.INT, 0);
-//				}
-//				if(rank!=0){
-//					//this is overriding the action for each compute node with the action selected by the master node
-//					int[] tempActionCompute= new int[1];
-//					MPI.COMM_WORLD.bcast(tempActionCompute, 1, MPI.INT, 0);
-//					action= tempActionCompute[0];
-//				}
-//			}
-//			
-//			
-//			if(TESTPRINT){
-//				//get the point for this move
-//				System.out.println ("rank " + rank + " about to determine score with action state " + action + " " + currentNode.state.longState);
-//			}
-//			
-//			if(TESTPRINT){
-//				System.out.println ("rank " + rank + " after " + i + " moves taken = "  + taken);
-//			}
-//			if(TESTPRINT){
-//				System.out.println("rank "+rank+" action: "+action);
-//				System.out.println("rank "+rank+" prev-state "+currentNode.state.longState);
-//			}
-//			//update the currentNodes
-//			currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-//			currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-//			
-//			/*possibly circumvent the null pointer*/
-//			if(currentNode == null || currentNode2 == null){
-//				System.out.println("Null Error: " + currentNode == null ? "Player 1" : "Player 2");
-//				return -10;
-//			}
-//			
-//			if(playerOneTurn){
-//				p1Score += taken;
-//			} else {
-//				p2Score += taken;
-//			}
-//			if(TESTPRINT){
-//				System.out.println("rank "+rank+" post-state "+currentNode.state.longState);
-//				System.out.println (" rank = " + rank + " score after " + i + "moves  is " + p1Score);
-//			}
-//			playerOneTurn = taken > 0 ? playerOneTurn : !playerOneTurn;
-//			i++;
-//		}
-//		
-//		int p1Net = p1Score - p2Score;
-//		
-//		if(TESTPRINT){
-//			System.out.println (" rank = " + rank + " is done after all moves  and netscore " + p1Net);
-//		}
-//		return p1Net > 0 ? 1 : p1Net < 0 ? -1 : 0;
-//	}
-//	
-//	
-//	public static void competitionParallel(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2, int matches) throws MPIException{
-//		
-//		int wins = 0;
-//		int losses = 0;
-//		int draws = 0;
-//		
-//		double totalAveDepth = 0;
-//		long totalNodes = 0;
-//		
-//		
-//		/* plays a match */
-//		for(int i = matches; i > 0; i--){
-//			double[] results = match(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2, true);
-//			int result = (int) results[0];
-//			totalAveDepth += results[1];
-//			totalNodes += results[2];
-//			
-//			if(result == 1)
-//				wins++;
-//			else if(result == 0){
-//				draws++;
-//			} else {
-//				losses++;
-//			}
-//		}
-//		
-//		/* Results */
-//		System.out.println(height + "x" + width + " c=" + c + " matches=" + matches + " sims=" + simulationsPerTurn1 + "," + simulationsPerTurn2 + " p1=" + (game.scored ? "sc+" : "nsc+") + (game.asymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+") + (game2.asymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
-//		System.out.println("nodes: " + totalNodes / matches);
-//		System.out.println("average depth: " + (totalAveDepth / matches));
-//		
-//		printAveTime("Average Times RANK "+rank, times);
-//		printNumTime("Number of Times Chosen "+rank, times);
-//	}
-//	
-//	
+		if(rank==0 ){
+			nSum= sumWithin(nToGather, currNodeNumActions);
+			rSum= sumWithin(rToGather, currNodeNumActions);
+			
+			if(TESTPRINT){
+				System.out.println("rank "+rank+" AFTER GATHER BEFORE BCAST ");
+				//System.out.print("rank "+rank+" nSum AFTER ");
+				printArr("rank "+rank+" nSum AFTER ", nSum);
+				//System.out.print("rank "+rank+" wSum  AFTER ");
+				printArr("rank "+rank+" wSum  AFTER ",rSum);
+			}
+			
+			MPI.COMM_WORLD.bcast(rSum, currNodeNumActions, MPI.DOUBLE, 0);
+			MPI.COMM_WORLD.bcast(nSum, currNodeNumActions, MPI.INT, 0);
+		}
+		if(rank!= 0){
+			
+			MPI.COMM_WORLD.bcast(rToRecieve, currNodeNumActions, MPI.DOUBLE, 0);
+			MPI.COMM_WORLD.bcast(nToRecieve, currNodeNumActions, MPI.INT, 0);
+			toReturn.setRewards(rToRecieve);
+			toReturn.setTimesActionChosen(nToRecieve);
+			
+			if(TESTPRINT){
+				System.out.print("rank "+rank+" AFTER BCAST");
+				//System.out.print("rank "+rank+" what q was recieved: AFTER");
+				printArr("rank "+rank+" what q was recieved: AFTER",rToRecieve);
+				//System.out.print("rank "+rank+" what n was received: AFTER");
+				printArr("rank "+rank+" what n was received: AFTER",nToRecieve);
+				//System.out.print("rank "+rank+" current node's child averages:AFTER ");
+				printArr("rank "+rank+" current node's rewards:AFTER ", toReturn.getRewards());
+				//System.out.print("rank "+rank+" current node's TAC: ");
+				printArr("rank "+rank+" current node's TAC: ",toReturn.getTimesActionChosen());
+			}
+		}
+		return toReturn;
+		
+	}
+	
+	//prints the contents of the array
+	public static void printArr(String res,int[] arr){
+		for(int i=0; i<arr.length; i++){
+			res= res+ arr[i]+" ";
+		}
+		System.out.println(res);
+	}
+	public static void printArr(String res, double[] arr){
+		for(int i=0; i<arr.length; i++){
+			res= res+ arr[i]+" ";
+			//System.out.print(arr[i]+" ");
+		}
+		System.out.println(res);
+	}
+	//arrays must be the same length, multipies them together
+	public static double[] arrayMultiply(int[] arr1, double[] arr2){
+		double[] product = new double[arr1.length];
+		for(int i=0; i<arr1.length; i++){
+			product[i]=(arr1[i]*arr2[i]);
+		}
+		return product;
+	}
+
+	//kind of sums an array
+	public static double[] sumWithin(double[] arr, int num){
+		double[] sum= new double[num];
+		for(int i=0; i< arr.length; i++ ){
+			sum[i%num] += arr[i];
+		}
+
+		return sum;
+	}
+
+	public static int[] sumWithin(int[] arr, int num){
+		int[] sum= new int[num];
+		for(int i=0; i< arr.length; i++ ){
+			sum[i%num] += arr[i];
+		}
+
+		return sum;
+	}
+
+	//divides two arrays by index
+	public static double[] arrayDivide(int[] arr1, double[] arr2){
+		double[] result = new double[arr1.length];
+		for(int i=0; i<arr1.length; i++){
+			result[i]=(arr2[i]/arr1[i]);
+		}
+		return result;
+	}
+
+	public static void printAveTime(String res, long[][] arr){
+		String printStr="";
+		printStr+=res;
+		
+		for(int i = 0; i < arr.length; i++){
+			if(arr[i][1] == 0){
+				continue;
+			}
+			
+			printStr+=" Move " + i + ": " + arr[i][0] / (double)arr[i][1];
+		}
+		System.out.println(printStr);
+	}
+	
+	public static void printNumTime(String res, long[][] arr){
+		String printStr="";
+		
+		printStr+=res;
+		for(int i=0; i<times.length; i++){
+			printStr+=" Move "+i+": "+arr[i][1];
+		}
+		System.out.println(printStr);
+	}
+		
+	
+	/**
+	 * Plays a single game between two MCTS players.
+	 * 
+	 * @param  tree The tree for player one.
+	 * @param  game The game for player one.
+	 * @param  tree2 The tree for player two.
+	 * @param  game2 The game for player two.
+	 * @param  simulationsPerTurn1 The number of simulations given to player one.
+	 * @param  simulationsPerTurn2 The number of simulations given to player two.
+	 * @return An integer representing the result for player one.
+	 */
+	public static int testGameParallel(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2) throws MPIException{
+		
+		GameState terminalState = null;
+		
+		if(edges > 60){
+			terminalState = new GameState(new BigInteger("2").pow(edges).subtract(new BigInteger("1")));
+		} 
+		else{
+			terminalState = new GameState((long) Math.pow(2, edges) - 1);
+		}
+		
+		//the current node of each tree
+		MCNode currentNode = tree.root;
+		MCNode currentNode2 = tree2.root;
+		
+		//the game variables
+		int action = 0;
+		boolean playerOneTurn = true;
+		int p1Score = 0;
+		int p2Score = 0;
+		
+		//the number of boxes that are completed or have two edges
+		int twoOrFour = 0;
+		
+		//board[i] is the number of taken edges for box i
+		int[] board = new int[width * height];
+		
+		//a clone to pass to the simulate method
+		int[] boardClone = new int[width * height];
+		
+		//for every turn
+		while(!currentNode.state.equals(terminalState)){
+			int i=0;
+			if(p1Score > (width*width) / 2 || p2Score > (width*width) / 2){
+				break;
+			}
+			
+			int sims = playerOneTurn ? simulationsPerTurn1 : simulationsPerTurn2;
+			
+			//get the action based on the current player
+			if(playerOneTurn){
+				long start = System.nanoTime();
+				
+				//perform the simulations for this move
+				while(sims > 0){
+					//give player one's game, tree, node, and score
+					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game, boardClone, twoOrFour);
+					if(maxTasks>1){
+						if(sims< simulationsPerTurn1 && sims%shareInfoEvery ==0 ){
+							try{
+								doStuff(currentNode);
+							}
+							catch(Exception e){
+								// display the rank, the exception message (if any) and the
+								// stacktrace
+
+								System.out.println(" rank " + rank + " crashed " + e.getMessage());
+								e.printStackTrace();
+
+								// abort processing
+								//MPI.COMM_WORLD.abort(1);
+							}
+
+						}	
+					}
+					
+					sims--;
+				}
+				
+				long end = System.nanoTime();
+				
+				try{
+					times[currentNode.depth][1]++;
+					times[currentNode.depth][0] = times[currentNode.depth][0] + (end - start);
+				} catch (ArrayIndexOutOfBoundsException e) {
+					System.out.println("Array Index Error");
+					return -10;
+				}
+				
+				action = currentNode.getNextAction(0);
+			} else {
+				//perform the simulations for this move
+				while(sims > 0){
+					//give player two's game, tree, node, and score
+					simulate(currentNode2.state, p2Score - p1Score, currentNode2, terminalState, tree2, game2, boardClone, twoOrFour);
+					sims--;
+				}
+				
+				action = currentNode2.getNextAction(0);
+			}
+			
+			// get the points for this move
+			int taken = 0;
+			
+			// increment the edges for each box which adjoins action
+			for(int b = 0; b < game.edgeBoxes[action].length; b++){
+				board[game.edgeBoxes[action][b]]++;
+				boardClone[game.edgeBoxes[action][b]]++;
+				
+				if(board[game.edgeBoxes[action][b]] == 4){
+					taken++;
+					twoOrFour++;
+				} else if (board[game.edgeBoxes[action][b]] == 2){
+					twoOrFour++;
+				}
+			}
+			
+			if(maxTasks>1){
+				if(rank==0){
+
+					int[] tempAction= {action};
+					MPI.COMM_WORLD.bcast(tempAction, 1, MPI.INT, 0);
+				}
+				if(rank!=0){
+					//this is overriding the action for each compute node with the action selected by the master node
+					int[] tempActionCompute= new int[1];
+					MPI.COMM_WORLD.bcast(tempActionCompute, 1, MPI.INT, 0);
+					action= tempActionCompute[0];
+				}
+			}
+			
+			
+			if(TESTPRINT){
+				//get the point for this move
+				System.out.println ("rank " + rank + " about to determine score with action state " + action + " " + currentNode.state.longState);
+			}
+			
+			if(TESTPRINT){
+				System.out.println ("rank " + rank + " after " + i + " moves taken = "  + taken);
+			}
+			if(TESTPRINT){
+				System.out.println("rank "+rank+" action: "+action);
+				System.out.println("rank "+rank+" prev-state "+currentNode.state.longState);
+			}
+			//update the currentNodes
+			currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+			currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+			
+			/*possibly circumvent the null pointer*/
+			if(currentNode == null || currentNode2 == null){
+				System.out.println("Null Error: " + currentNode == null ? "Player 1" : "Player 2");
+				return -10;
+			}
+			
+			if(playerOneTurn){
+				p1Score += taken;
+			} else {
+				p2Score += taken;
+			}
+			if(TESTPRINT){
+				System.out.println("rank "+rank+" post-state "+currentNode.state.longState);
+				System.out.println (" rank = " + rank + " score after " + i + "moves  is " + p1Score);
+			}
+			playerOneTurn = taken > 0 ? playerOneTurn : !playerOneTurn;
+			i++;
+		}
+		
+		int p1Net = p1Score - p2Score;
+		
+		if(TESTPRINT){
+			System.out.println (" rank = " + rank + " is done after all moves  and netscore " + p1Net);
+		}
+		return p1Net > 0 ? 1 : p1Net < 0 ? -1 : 0;
+	}
+	
+	
+	public static void competitionParallel(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2, int matches) throws MPIException{
+		
+		int wins = 0;
+		int losses = 0;
+		int draws = 0;
+		
+		double totalAveDepth = 0;
+		long totalNodes = 0;
+		
+		
+		/* plays a match */
+		for(int i = matches; i > 0; i--){
+			double[] results = match(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2, true);
+			int result = (int) results[0];
+			totalAveDepth += results[1];
+			totalNodes += results[2];
+			
+			if(result == 1)
+				wins++;
+			else if(result == 0){
+				draws++;
+			} else {
+				losses++;
+			}
+		}
+		
+		/* Results */
+		System.out.println(height + "x" + width + " c=" + c + " matches=" + matches + " sims=" + simulationsPerTurn1 + "," + simulationsPerTurn2 + " p1=" + (game.scored ? "sc+" : "nsc+") + (game.asymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+") + (game2.asymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
+		System.out.println("nodes: " + totalNodes / matches);
+		System.out.println("average depth: " + (totalAveDepth / matches));
+		
+		printAveTime("Average Times RANK "+rank, times);
+		printNumTime("Number of Times Chosen "+rank, times);
+	}
+	
 	/*----------------------------------------------------------------------------------------------*/
 }
