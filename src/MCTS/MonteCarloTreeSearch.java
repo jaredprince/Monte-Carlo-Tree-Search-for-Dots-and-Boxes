@@ -9,7 +9,7 @@ import java.util.Random;
  * 
  * The amount of game-specific data in this class should be minimal.
  * Only the data that is absolutely necessary (to keep MCTree and MCNode clear of game-specific data)
- * should be used here. Wherever possible, the such data should be located in the MCGame subclass and
+ * should be used here. Wherever possible, such data should be located in the MCGame subclass and
  * used by the public methods of MCGame (getActons and getSuccessorState).
  * 
  * @author Jared Prince
@@ -19,8 +19,6 @@ import java.util.Random;
 
 public class MonteCarloTreeSearch {
 
-	static int nullErrors = 0;
-	
 	/**
 	 * Used to randomly pick actions.
 	 */
@@ -305,8 +303,7 @@ public class MonteCarloTreeSearch {
 		edges = (height * (width + 1)) + (width * (height + 1));
 		times = new long[edges][2];
 		game = new DotsAndBoxes(height, width, scored1, sym1);
-		
-		
+				
 		if(parallel){
 //			game2 = new DotsAndBoxes(height, width, scored1, sym1);
 //			
@@ -593,10 +590,7 @@ public class MonteCarloTreeSearch {
 			
 			/* possibly circumvent the null pointer */
 			if (currentNode == null || currentNode2 == null) {
-				System.out.println("Null Error: " + (currentNode == null ? "Player 1" : "Player 2"));
-				
-				nullErrors++;
-				
+				System.out.println("Null Error: " + (currentNode == null ? "Player 1" : "Player 2"));				
 				return -10;
 			}
 			

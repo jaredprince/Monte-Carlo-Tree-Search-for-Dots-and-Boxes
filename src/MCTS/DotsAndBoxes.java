@@ -16,7 +16,7 @@ import java.util.Arrays;
  * Added a method to give the number of taken edges for each box.
  */
 
-public class DotsAndBoxes extends MCGame{
+public class DotsAndBoxes extends MCGame {
 	
 	/** The height (in boxes) of the board.
 	 */
@@ -48,38 +48,16 @@ public class DotsAndBoxes extends MCGame{
 	 */
 	public int[][] boxEdges;
 	
-	/** A 2D array which maps each edge (in square boards of size 1 - 9) to its position after a single rotation of the board.
-	 *  Position i contains the map for a square board of size i + 1.
-	 *  Position j in i contains an integer representing the edge which edge j will become after rotation.
+	/** An array which maps each edge on the board to another edge after rotation.
+	 *  Position i represents the number of the edge that edge i will move to after a 90 degree rotation.
 	 */
-	public static int[][] rotationMap = {
-		{2,0,3,1},
-		{4,9,1,6,11,3,8,0,5,10,2,7},
-		{6,13,20,2,9,16,23,5,12,19,1,8,15,22,4,11,18,0,7,14,21,3,10,17},
-		{8,17,26,35,3,12,21,30,39,7,16,23,34,2,11,20,29,38,6,15,24,33,1,10,19,28,37,5,14,23,32,0,9,18,27,36,4,13,22,31},
-		{10,21,32,43,54,4,15,26,37,48,59,9,20,31,42,53,3,14,25,36,47,58,8,19,30,41,52,2,13,24,35,46,57,7,18,29,40,51,1,12,23,34,45,56,6,17,28,39,50,0,11,22,33,44,55,5,16,27,38,49},
-		{12,25,38,51,64,77,5,18,31,44,57,70,83,11,24,37,50,63,76,4,17,30,43,56,69,82,10,23,36,49,62,75,3,16,29,42,55,68,81,9,22,35,48,61,74,2,15,28,41,54,67,80,8,21,34,47,60,73,1,14,27,40,53,66,79,7,20,33,46,59,72,0,13,26,39,52,65,78,6,19,32,45,58,71},
-		{14,29,44,59,74,89,104,6,21,36,51,66,81,96,111,13,28,43,58,73,88,103,5,20,35,50,65,80,95,110,12,27,42,57,72,87,102,4,19,34,49,64,79,94,109,11,26,41,56,71,86,101,3,18,33,48,63,78,93,108,10,25,40,55,70,85,100,2,17,32,47,62,77,92,107,9,24,39,54,69,84,99,1,16,31,46,61,76,91,106,8,23,38,53,68,83,98,0,15,30,45,60,75,90,105,7,22,37,52,67,82,97},
-		{16,33,50,67,84,101,118,135,7,24,41,58,75,92,109,126,143,15,32,49,66,83,100,117,134,6,23,40,57,74,91,108,125,142,14,31,48,65,82,99,116,133,5,22,39,56,73,90,107,124,141,13,30,47,64,81,98,115,132,4,21,38,55,72,89,106,123,140,12,29,46,63,80,97,114,131,3,20,37,54,71,88,105,122,139,11,28,45,62,79,96,113,130,2,19,36,53,70,87,104,121,138,10,27,44,61,78,95,112,129,1,18,35,52,69,86,103,120,137,9,26,43,60,77,94,111,128,0,17,34,51,68,85,102,119,136,8,25,42,59,76,93,110,127},
-		{18,37,56,75,94,113,132,151,170,8,27,46,65,84,103,122,141,160,179,17,36,55,74,93,112,131,150,169,7,26,45,64,83,102,121,140,159,178,16,35,54,73,92,111,130,149,168,6,25,44,63,82,101,120,139,158,177,15,34,53,72,91,110,129,148,167,5,24,43,62,81,100,119,138,157,176,14,33,52,71,90,109,128,147,166,4,23,42,61,80,99,118,137,156,175,13,32,51,70,89,108,127,146,165,3,22,41,60,79,98,117,136,155,174,12,31,50,69,88,107,126,145,164,2,21,40,59,78,97,116,135,154,173,11,30,49,68,87,106,125,144,163,1,20,39,58,77,96,115,134,153,172,10,29,48,67,86,105,124,143,162,0,19,38,57,76,95,114,133,152,171,9,28,47,66,85,104,123,142,161,}
-	};
+	public static int[] rotationMap;
 	
 	
-	/** A 2D array which maps each edge (in square boards of size 1 - 9) to its position after a reflection of the board.
-	 *  Position i contains the map for a square board of size i + 1.
-	 *  Position j in i contains an integer representing the edge which edge j will become after reflection.
+	/** An array which maps each edge on the board to another edge after reflection.
+	 *  Position i represents the number of the edge that edge i will move to after a reflection across the y axis.
 	 */
-	public static int[][] reflectionMap = {
-		{3,2,1,0},
-		{10,11,7,8,9,5,6,2,3,4,0,1},
-		{21,22,23,17,18,19,20,14,15,16,10,11,12,13,7,8,9,3,4,5,6,0,1,2},
-		{39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0},
-		{4,3,2,1,0,10,9,8,7,6,5,15,14,13,12,11,21,20,19,18,17,16,26,25,24,23,22,32,31,30,29,28,27,37,36,35,34,33,43,42,41,40,39,38,48,47,46,45,44,54,53,52,51,50,49,59,58,57,56,55},
-		{5,4,3,2,1,0,12,11,10,9,8,7,6,18,17,16,15,14,13,25,24,23,22,21,20,19,31,30,29,28,27,26,38,37,36,35,34,33,32,44,43,42,41,40,39,51,50,49,48,47,46,45,57,56,55,54,53,52,64,63,62,61,60,59,58,70,69,68,67,66,65,77,76,75,74,73,72,71,83,82,81,80,79,78},
-		{6,5,4,3,2,1,0,14,13,12,11,10,9,8,7,21,20,19,18,17,16,15,29,28,27,26,25,24,23,22,36,35,34,33,32,31,30,44,43,42,41,40,39,38,37,51,50,49,48,47,46,45,59,58,57,56,55,54,53,52,66,65,64,63,62,61,60,74,73,72,71,70,69,68,67,81,80,79,78,77,76,75,89,88,87,86,85,84,83,82,96,95,94,93,92,91,90,104,103,102,101,100,99,98,97,111,110,109,108,107,106,105},
-		{7,6,5,4,3,2,1,0,16,15,14,13,12,11,10,9,8,24,23,22,21,20,19,18,17,33,32,31,30,29,28,27,26,25,41,40,39,38,37,36,35,34,50,49,48,47,46,45,44,43,42,58,57,56,55,54,53,52,51,67,66,65,64,63,62,61,60,59,75,74,73,72,71,70,69,68,84,83,82,81,80,79,78,77,76,92,91,90,89,88,87,86,85,101,100,99,98,97,96,95,94,93,109,108,107,106,105,104,103,102,118,117,116,115,114,113,112,111,110,126,125,124,123,122,121,120,119,135,134,133,132,131,130,129,128,127,143,142,141,140,139,138,137,136},
-		{8,7,6,5,4,3,2,1,0,18,17,16,15,14,13,12,11,10,9,27,26,25,24,23,22,21,20,19,37,36,35,34,33,32,31,30,29,28,46,45,44,43,42,41,40,39,38,56,55,54,53,52,51,50,49,48,47,65,64,63,62,61,60,59,58,57,75,74,73,72,71,70,69,68,67,66,84,83,82,81,80,79,78,77,76,94,93,92,91,90,89,88,87,86,85,103,102,101,100,99,98,97,96,95,113,112,111,110,109,108,107,106,105,104,122,121,120,119,118,117,116,115,114,132,131,130,129,128,127,126,125,124,123,141,140,139,138,137,136,135,134,133,151,150,149,148,147,146,145,144,143,142,160,159,158,157,156,155,154,153,152,170,169,168,167,166,165,164,163,162,161,179,178,177,176,175,174,173,172,171}
-	};
+	public static int[] reflectionMap;
 	
 	/**
 	 * Creates an array representing a map of edges to edges when rotating the board 90 degrees.
@@ -180,10 +158,12 @@ public class DotsAndBoxes extends MCGame{
 		this.width = width;
 		this.scored = scored;
 		this.asymmetrical = asymmetrical;
-		this.scored = scored;
+		
+		rotationMap = getRotationMap(width);
+		reflectionMap = getReflectionMap(width);
 		
 		if(height != width && asymmetrical){
-			System.out.println("Cannot remove symmetries on a rectangular board.");
+			System.out.println("Symmetries can only be removed on a square board.");
 			asymmetrical = false;
 		}
 		
@@ -265,11 +245,11 @@ public class DotsAndBoxes extends MCGame{
 	 */
 	public int getTransformedAction(int edge, int rotation, boolean reflection){
 		for(int i = 0; i < rotation; i++){
-			edge = rotationMap[height - 1][edge];
+			edge = rotationMap[edge];
 		}
 		
 		if(reflection){
-			edge = reflectionMap[height - 1][edge];
+			edge = reflectionMap[edge];
 		}
 		
 		return edge;
@@ -892,7 +872,7 @@ public class DotsAndBoxes extends MCGame{
 		String newState = "";
 		
 		for(int i = 0; i < state.length(); i++){
-			newState = newState + state.charAt(rotationMap[height - 1][i]);
+			newState = newState + state.charAt(rotationMap[i]);
 		}
 		
 		return newState;
@@ -909,7 +889,7 @@ public class DotsAndBoxes extends MCGame{
 		String newState = "";
 		
 		for(int i = 0; i < state.length(); i++){
-			newState = newState + state.charAt(reflectionMap[height - 1][i]);
+			newState = newState + state.charAt(reflectionMap[i]);
 		}
 		
 		return newState;
@@ -951,5 +931,29 @@ public class DotsAndBoxes extends MCGame{
 		}
 		
 		return returnState;
+	}
+
+	public boolean compatible(MCGame game) {
+		if(game instanceof DotsAndBoxes){
+			DotsAndBoxes game2 = (DotsAndBoxes) game;
+			if(this.height == game2.height && this.width == game2.width){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public boolean equals(MCGame game) {
+		if(game instanceof DotsAndBoxes){
+			DotsAndBoxes game2 = (DotsAndBoxes) game;
+			if(this.height == game2.height && this.width == game2.width){
+				if(this.asymmetrical == game2.asymmetrical && this.scored == game2.scored){
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 }

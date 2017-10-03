@@ -48,7 +48,7 @@ public class GameState {
 			try{
 				longState = new Long(Long.parseLong(state,2));
 			} catch (Exception e) {
-				//parse binary to big int
+				//parse binary to big integer
 				bigState = new BigInteger(state, 2);
 			}
 		}

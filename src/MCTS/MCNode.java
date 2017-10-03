@@ -179,44 +179,15 @@ public class MCNode {
 	 */
 	public MCNode getNode(GameState state, int behavior) {
 
-		String canon = ((DotsAndBoxes) tree.game).removeSymmetries(state).getString();
-
 		/* check every action to find the one specified */
 		for (int i = 0; i < links.length; i++) {
 
 			/* Get the corresponding child */
 			if (links[i].child != null) {
 
-				// if the asymmetrical state is the same as the canon of the
-				// state given
-				if (links[i].child.state.getString().equals(canon)) {
+				//if the state of the child is equal to the state given
+				if (links[i].child.state.equals(state)) {
 					return links[i].child;
-				}
-			}
-
-			else {
-
-				GameState linkState = tree.game.getSuccessorState(state, links[i].action);
-
-				// if the nonsymmetrical state is the same as the canon of the
-				// state given
-				if (((DotsAndBoxes) tree.game).removeSymmetries(linkState).getString().equals(canon)) {
-
-					/* Create a new node */
-					if (behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_ALWAYS
-							|| (links[i].timesChosen == MCTree.NODE_CREATION_COUNT
-									&& behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD)) {
-
-						MCNode newNode = getNextNode(links[i].action);
-						links[i].child = tree.addNode(newNode);
-
-						if (isLeaf) {
-							isLeaf = false;
-							tree.leaves--;
-						}
-
-						return links[i].child;
-					}
 				}
 			}
 		}
