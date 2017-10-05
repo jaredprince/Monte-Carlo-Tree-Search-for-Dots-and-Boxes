@@ -152,7 +152,7 @@ public class MonteCarloTreeSearch {
 	 *            	shareInfoEvery, tasks
 	 */
 	public static void main(String[] args) /*throws MPIException*/ {
-		
+
 		long s = System.currentTimeMillis();
 		
 		int matches = 0, sims1 = 0, sims2 = 0, opponent = 0;
@@ -303,7 +303,7 @@ public class MonteCarloTreeSearch {
 		edges = (height * (width + 1)) + (width * (height + 1));
 		times = new long[edges][2];
 		game = new DotsAndBoxes(height, width, scored1, sym1);
-				
+		
 		if(parallel){
 //			game2 = new DotsAndBoxes(height, width, scored1, sym1);
 //			
@@ -745,7 +745,7 @@ public class MonteCarloTreeSearch {
 				state = terminalState;
 				break;
 			}
-			
+
 			int taken = 0;
 			
 			// increment the edges for each box which adjoins action
@@ -881,8 +881,8 @@ public class MonteCarloTreeSearch {
 	}
 	
 	/*-----------------------------------Parallel MCTS----------------------------------------------*/
-	
-//	public static MCNode doStuff(MCNode currNode) throws MPIException{
+//	
+//	public static MCNode doStuff(MCNode currNode) throws MPIException {
 //		int currNodeNumActions= DotsAndBoxes.getAllActions(currNode.state, edges).length;
 //		MCNode toReturn = currNode;
 //		
@@ -1095,7 +1095,7 @@ public class MonteCarloTreeSearch {
 //	 * @param  simulationsPerTurn2 The number of simulations given to player two.
 //	 * @return An integer representing the result for player one.
 //	 */
-//	public static int testGameParallel(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2) throws MPIException{
+//	public static int testGameParallel(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2, int simulationsPerTurn1, int simulationsPerTurn2) throws MPIException {
 //		
 //		GameState terminalState = null;
 //		
@@ -1115,7 +1115,7 @@ public class MonteCarloTreeSearch {
 //		boolean playerOneTurn = true;
 //		int p1Score = 0;
 //		int p2Score = 0;
-//		
+//
 //		//the number of boxes that are completed or have two edges
 //		int twoOrFour = 0;
 //		
@@ -1160,6 +1160,8 @@ public class MonteCarloTreeSearch {
 //
 //						}	
 //					}
+//
+//					
 //					
 //					sims--;
 //				}
@@ -1185,7 +1187,7 @@ public class MonteCarloTreeSearch {
 //				
 //				action = currentNode2.getNextAction(0);
 //			}
-//			
+//
 //			// get the points for this move
 //			int taken = 0;
 //			
@@ -1295,7 +1297,6 @@ public class MonteCarloTreeSearch {
 //		printAveTime("Average Times RANK "+rank, times);
 //		printNumTime("Number of Times Chosen "+rank, times);
 //	}
-//	
-//	
+	
 	/*----------------------------------------------------------------------------------------------*/
 }
