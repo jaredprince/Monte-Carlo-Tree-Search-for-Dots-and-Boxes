@@ -763,7 +763,7 @@ public class DotsAndBoxes extends MCGame {
 		for(int j = 0; j < 3; j++){
 			stateString = rotate(stateString);
 
-			if(first(stateString, returnState)){
+			if(!binaryMax(stateString, returnState)){
 				returnState = stateString;
 			}
 		}
@@ -772,7 +772,7 @@ public class DotsAndBoxes extends MCGame {
 		
 		stateString = reflect(stateString);
 		
-		if(first(stateString, returnState)){
+		if(!binaryMax(stateString, returnState)){
 			returnState = stateString;
 		}
 
@@ -781,7 +781,7 @@ public class DotsAndBoxes extends MCGame {
 		for(int j = 0; j < 3; j++){
 			stateString = rotate(stateString);
 			
-			if(first(stateString, returnState)){
+			if(!binaryMax(stateString, returnState)){
 				returnState = stateString;
 			}
 		}
@@ -791,6 +791,7 @@ public class DotsAndBoxes extends MCGame {
 	
 	/**
 	 * Gets the asymmetrical canonical representation of a given state.
+	 * The canonical representation is the one whose integer value is smallest.
 	 * 
 	 * @param  state The state to transform.
 	 * @return The canonical representation of state.
@@ -812,7 +813,7 @@ public class DotsAndBoxes extends MCGame {
 		for(int j = 0; j < 3; j++){
 			stateString = rotate(stateString);
 
-			if(first(stateString, returnState)){
+			if(!binaryMax(stateString, returnState)){
 				returnState = stateString;
 			}
 		}
@@ -821,7 +822,7 @@ public class DotsAndBoxes extends MCGame {
 		
 		stateString = reflect(stateString);
 		
-		if(first(stateString, returnState)){
+		if(!binaryMax(stateString, returnState)){
 			returnState = stateString;
 		}
 
@@ -830,7 +831,7 @@ public class DotsAndBoxes extends MCGame {
 		for(int j = 0; j < 3; j++){
 			stateString = rotate(stateString);
 			
-			if(first(stateString, returnState)){
+			if(!binaryMax(stateString, returnState)){
 				returnState = stateString;
 			}
 		}
@@ -839,13 +840,13 @@ public class DotsAndBoxes extends MCGame {
 	}
 	
 	/**
-	 * Checks which binary string is larger.
+	 * Checks if the first binary string is larger than the second.
 	 * 
 	 * @param  firstState The first state to compare.
 	 * @param  secondState The second state to compare.
 	 * @return True if the first string is larger, false otherwise.
 	 */
-	public boolean first(String firstState, String secondState){
+	public boolean binaryMax(String firstState, String secondState){
 		int length = firstState.length();
 		char c1;
 		char c2;
@@ -919,7 +920,7 @@ public class DotsAndBoxes extends MCGame {
 			returnState = new GameStateScored(newState, score);
 		}
 		
-		else if(edges - action - 2 > 62){
+		else if(edges - action - 2 > 60){
 			BigInteger newState = new BigInteger(Long.toString(state.longState));
 			newState = newState.flipBit(edges - action - 1);
 			returnState = new GameStateScored(newState, score);
@@ -962,10 +963,12 @@ public class DotsAndBoxes extends MCGame {
 			s2 = "0" + s2;
 		}
 		
+		//the states are equal
 		if(s1.equals(s2)){
 			return 0;
 		}
 		
+		//rotate 3 times
 		for(int i = 1; i < 4; i++){
 			s1 = rotate(s1);
 			
@@ -974,6 +977,7 @@ public class DotsAndBoxes extends MCGame {
 			}
 		}
 		
+		//reflect
 		s1 = rotate(s1);
 		s1 = reflect(s1);
 		
@@ -981,6 +985,7 @@ public class DotsAndBoxes extends MCGame {
 			return 4;
 		}
 		
+		//rotate 3 times
 		for(int i = 5; i < 8; i++){
 			s1 = rotate(s1);
 			
@@ -992,10 +997,20 @@ public class DotsAndBoxes extends MCGame {
 		return -1;
 	}
 
+	/**
+	 * Checks whether the given game is compatible with this one.
+	 * Returns true if width, height, and asymmetrical values are
+	 * equal. If symmetrical vs. asymmetrical games are ever fixed,
+	 * the asymmetrical values will not need to be equal.
+	 * 
+	 * @param game The game with which to compare.
+	 * @return True if the games are compatible, false otherwise.
+	 * @see MCTS.MCGame#compatible(MCTS.MCGame)
+	 */
 	public boolean compatible(MCGame game) {
 		if(game instanceof DotsAndBoxes){
 			DotsAndBoxes game2 = (DotsAndBoxes) game;
-			if(this.height == game2.height && this.width == game2.width){
+			if(this.height == game2.height && this.width == game2.width && this.asymmetrical == game2.asymmetrical){
 				return true;
 			}
 		}
@@ -1003,6 +1018,15 @@ public class DotsAndBoxes extends MCGame {
 		return false;
 	}
 
+	/**
+	 * Checks if the given game is equivalent to this one.
+	 * Returns true only if width, height, asymmetrical, and scored 
+	 * values are equal for both games.
+	 * 
+	 * @param game The game with which to compare.
+	 * @return True if the games are equal, false otherwise.
+	 * @see MCTS.MCGame#equals(MCTS.MCGame)
+	 */
 	public boolean equals(MCGame game) {
 		if(game instanceof DotsAndBoxes){
 			DotsAndBoxes game2 = (DotsAndBoxes) game;
