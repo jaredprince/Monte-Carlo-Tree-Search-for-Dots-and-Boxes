@@ -168,7 +168,7 @@ public class MCNode {
 	}
 
 	/**
-	 * Gets the successor of this node based on the state and action given.
+	 * Gets the successor of this node based on the state given.
 	 * 
 	 * @param state
 	 *            The state equivalent to the one needed.
@@ -190,7 +190,14 @@ public class MCNode {
 					return links[i].child;
 				}
 			}
-		}
+			
+			else {
+				MCNode child = getNextNode(links[i].action);
+				if(child.state.equals(state)){
+					return getNode(links[i].action, behavior);
+				}
+			}
+		}		
 
 		return null;
 	}
@@ -235,7 +242,7 @@ public class MCNode {
 		for (int i = 0; i < links.length; i++) {
 			links[i].updateBonus(timesReached, c);
 
-//			sortLink(links, i);
+			/* sortLink(links, i); */
 		}
 	}
 	

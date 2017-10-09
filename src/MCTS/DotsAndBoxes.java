@@ -932,6 +932,65 @@ public class DotsAndBoxes extends MCGame {
 		
 		return returnState;
 	}
+	
+	/**
+	 * Returns a value representing the number of clockwise rotations needed to reach state2 from state1.
+	 * If the states are equal, the value returned is 0.
+	 * If the states are not symmetrical, the value returned is -1.
+	 * Values 1-3 represent rotations only.
+	 * Value 4 represents only a reflection.
+	 * Values 5-7 represent a reflection and 1-3 rotations.
+	 * 
+	 * @param state1 The state to translate.
+	 * @param state2 The goal state.
+	 * @return The rotation value.
+	 */
+	public int getRotation(GameState state1, GameState state2){
+		
+		String s1 = state1.getBinaryString();
+		String s2 = state2.getBinaryString();
+		
+		// add extra leading zeros for state 1
+		int b = s1.length();
+		for (int i = 0; i < (edges - b); i++) {
+			s1 = "0" + s1;
+		}
+		
+		// add extra leading zeros for state 2
+		b = s2.length();
+		for (int i = 0; i < (edges - b); i++) {
+			s2 = "0" + s2;
+		}
+		
+		if(s1.equals(s2)){
+			return 0;
+		}
+		
+		for(int i = 1; i < 4; i++){
+			s1 = rotate(s1);
+			
+			if(s1.equals(s2)){
+				return i;
+			}
+		}
+		
+		s1 = rotate(s1);
+		s1 = reflect(s1);
+		
+		if(s1.equals(s2)){
+			return 4;
+		}
+		
+		for(int i = 5; i < 8; i++){
+			s1 = rotate(s1);
+			
+			if(s1.equals(s2)){
+				return i;
+			}
+		}
+		
+		return -1;
+	}
 
 	public boolean compatible(MCGame game) {
 		if(game instanceof DotsAndBoxes){
