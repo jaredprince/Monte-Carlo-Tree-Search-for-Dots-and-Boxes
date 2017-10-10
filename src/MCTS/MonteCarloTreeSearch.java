@@ -555,7 +555,7 @@ public class MonteCarloTreeSearch {
 				} else if (board[game.edgeBoxes[action][i]] == 2){
 					twoOrFour++;
 				}
-			}			
+			}
 			
 			//if both players are symmetrical or both are asymmetrical, the same moves are possible for each
 			if(game.asymmetrical == game2.asymmetrical){
@@ -564,27 +564,59 @@ public class MonteCarloTreeSearch {
 				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
 			}
 			
-			//if the player in control is asymmetrical, translate
-			else if (playerOneTurn && game.asymmetrical) {
-				// update the currentNodes
-				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-			} else if (!playerOneTurn && game2.asymmetrical) {
-				// update the currentNodes
-				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+			else if(playerOneTurn){
+				if(!game.asymmetrical){
+					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+					currentNode2 = currentNode2.getNode(game.removeSymmetries(currentNode.state), BEHAVIOR_EXPANSION_ALWAYS);
+				}
+				
+				else {
+					//get the transformation from player one to player two
+					int rotation = game2.getRotation(currentNode2.state, currentNode.state);
+					int newAction = 0;
+					
+					//get the action which will make player one's (canon) board match player two's
+					switch(rotation){
+						case 1: newAction = game2.getTransformedAction(action, 1, false); break;
+						case 2: newAction = game2.getTransformedAction(action, 2, false); break;
+						case 3: newAction = game2.getTransformedAction(action, 3, false); break;
+						case 4: newAction = game2.getTransformedAction(action, 0, true); break;
+						case 5: newAction = game2.getTransformedAction(action, 1, true); break;
+						case 6: newAction = game2.getTransformedAction(action, 2, true); break;
+						case 7: newAction = game2.getTransformedAction(action, 3, true); break;
+						default: newAction = action;
+					}
+					
+					currentNode2 = currentNode2.getNode(newAction, BEHAVIOR_EXPANSION_ALWAYS);
+					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+				}
 			}
 			
-			//if the player in control is symmetrical, the moves must be translated to a symmetrical one
 			else {
-				
-				//get the next node for the symmetrical player in control
-				if(playerOneTurn) {
-					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-					currentNode2 = currentNode2.getNode(currentNode.state, BEHAVIOR_EXPANSION_ALWAYS);
-				} else {
+				if(!game2.asymmetrical){
 					currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-					currentNode = currentNode.getNode(currentNode2.state, BEHAVIOR_EXPANSION_ALWAYS);
+					currentNode = currentNode.getNode(game2.removeSymmetries(currentNode2.state), BEHAVIOR_EXPANSION_ALWAYS);
+				}
+				
+				else {
+					//get the transformation from player one to player two
+					int rotation = game.getRotation(currentNode.state, currentNode2.state);
+					int newAction = 0;
+					
+					//get the action which will make player one's (canon) board match player two's
+					switch(rotation){
+						case 1: newAction = game.getTransformedAction(action, 1, false); break;
+						case 2: newAction = game.getTransformedAction(action, 2, false); break;
+						case 3: newAction = game.getTransformedAction(action, 3, false); break;
+						case 4: newAction = game.getTransformedAction(action, 0, true); break;
+						case 5: newAction = game.getTransformedAction(action, 1, true); break;
+						case 6: newAction = game.getTransformedAction(action, 2, true); break;
+						case 7: newAction = game.getTransformedAction(action, 3, true); break;
+						default: newAction = action;
+					}
+					
+					currentNode = currentNode.getNode(newAction, BEHAVIOR_EXPANSION_ALWAYS);
+					currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
 				}
 			}
 			

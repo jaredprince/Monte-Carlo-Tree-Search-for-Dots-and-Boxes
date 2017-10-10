@@ -606,7 +606,8 @@ public class DotsAndBoxes extends MCGame {
 	}
 	
 	/**
-	 * Gets all the possible asymmetrical actions from the given state. Each free edge is a possible action. Each asymmetrical action leads to a asymmetrical state.
+	 * Gets all the possible asymmetrical actions from the given state. Each free edge is a possible action.
+	 * Each asymmetrical action leads to an asymmetrical state.
 	 * 
 	 * @param  state The state before the move is selected.
 	 * @return An integer array representing all possible moves from the given state.
@@ -999,9 +1000,7 @@ public class DotsAndBoxes extends MCGame {
 
 	/**
 	 * Checks whether the given game is compatible with this one.
-	 * Returns true if width, height, and asymmetrical values are
-	 * equal. If symmetrical vs. asymmetrical games are ever fixed,
-	 * the asymmetrical values will not need to be equal.
+	 * Returns true if width and height values are equal.
 	 * 
 	 * @param game The game with which to compare.
 	 * @return True if the games are compatible, false otherwise.
@@ -1010,7 +1009,7 @@ public class DotsAndBoxes extends MCGame {
 	public boolean compatible(MCGame game) {
 		if(game instanceof DotsAndBoxes){
 			DotsAndBoxes game2 = (DotsAndBoxes) game;
-			if(this.height == game2.height && this.width == game2.width && this.asymmetrical == game2.asymmetrical){
+			if(this.height == game2.height && this.width == game2.width){
 				return true;
 			}
 		}
