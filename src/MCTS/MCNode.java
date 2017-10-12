@@ -96,16 +96,11 @@ public class MCNode {
 	 */
 	public int getNextAction(double c) {
 
-		/* By default, the links are sorted in order by value + bonus */
-		if (c > 0) {
-			return links[0].action;
-		}
-
 		int action = -1;
-		double max = -50;
+		double max = links[0].getValue(false);
 
 		/* find the action with the largest average reward W(s,a) */
-		for (int i = 0; i < links.length; i++) {
+		for (int i = 1; i < links.length; i++) {
 
 			double val = links[i].getValue(false);
 

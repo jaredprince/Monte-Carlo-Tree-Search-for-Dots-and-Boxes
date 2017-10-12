@@ -520,15 +520,9 @@ public class MonteCarloTreeSearch {
 				}
 
 				long end = System.currentTimeMillis();
-
-				try {
-					times[currentNode.depth][1]++;
-					times[currentNode.depth][0] = times[currentNode.depth][0] + (end - start);
-				} catch (ArrayIndexOutOfBoundsException e) {
-					System.out.println("Array Index Error");
-					return -10;
-				}
-
+				times[currentNode.depth][1]++;
+				times[currentNode.depth][0] = times[currentNode.depth][0] + (end - start);
+				
 				action = currentNode.getNextAction(0);
 			} else {
 				// perform the simulations for this move
@@ -703,6 +697,7 @@ public class MonteCarloTreeSearch {
 
 		for (int i = 0; i < edges; i++) {
 
+			//get a random action
 			int action = randomPolicy(state);
 			state = game.getSimpleSuccessorState(state, action);
 
@@ -797,7 +792,7 @@ public class MonteCarloTreeSearch {
 			}
 
 			else {
-				/* this turns a scored state to unscored, but since it just
+				/* this casts a scored state to unscored, but since it just
 				 * feeds into simulateDefault, it doesn't matter
 				 */
 				state = game.getSuccessorState(state, action);

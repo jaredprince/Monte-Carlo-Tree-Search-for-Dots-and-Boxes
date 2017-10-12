@@ -58,4 +58,6 @@ public abstract class MCGame {
 	 * @return True if the games are equal, false otherwise.
 	 */
 	public abstract boolean equals(MCGame game);
+	
+	public abstract boolean isTerminal(GameState state);
 }

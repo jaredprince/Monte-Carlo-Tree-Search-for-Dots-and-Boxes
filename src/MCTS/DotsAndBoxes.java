@@ -59,6 +59,8 @@ public class DotsAndBoxes extends MCGame {
 	 */
 	public static int[] reflectionMap;
 	
+	public static GameState terminalState;
+	
 	/**
 	 * Creates an array representing a map of edges to edges when rotating the board 90 degrees.
 	 * This works only on square boards.
@@ -170,6 +172,12 @@ public class DotsAndBoxes extends MCGame {
 		edges = (height * (width + 1)) + (width * (height + 1));
 		
 		initializeEdgeToBoxMaps();
+		
+		if (edges > 60) {
+			terminalState = new GameState(new BigInteger("2").pow(edges).subtract(new BigInteger("1")));
+		} else {
+			terminalState = new GameState((long) Math.pow(2, edges) - 1);
+		}
 	}
 	
 	/**
@@ -1037,5 +1045,9 @@ public class DotsAndBoxes extends MCGame {
 		}
 		
 		return false;
+	}
+	
+	public boolean isTerminal(GameState state){
+		return state.equals(terminalState);
 	}
 }
