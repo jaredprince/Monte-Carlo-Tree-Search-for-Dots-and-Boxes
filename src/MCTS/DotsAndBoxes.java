@@ -2,6 +2,7 @@ package MCTS;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * A Dots and Boxes MCTSGame.
@@ -17,6 +18,10 @@ import java.util.Arrays;
  */
 
 public class DotsAndBoxes extends MCGame {
+	
+	public Random r = new Random();
+	
+	public int winningScore;
 	
 	/** The height (in boxes) of the board.
 	 */
@@ -59,7 +64,7 @@ public class DotsAndBoxes extends MCGame {
 	 */
 	public static int[] reflectionMap;
 	
-	public static GameState terminalState;
+	public GameState terminalState;
 	
 	/**
 	 * Creates an array representing a map of edges to edges when rotating the board 90 degrees.
@@ -160,6 +165,8 @@ public class DotsAndBoxes extends MCGame {
 		this.width = width;
 		this.scored = scored;
 		this.asymmetrical = asymmetrical;
+		
+		winningScore = (int) Math.ceil((height * width) / 2.0);
 		
 		rotationMap = getRotationMap(width);
 		reflectionMap = getReflectionMap(width);
@@ -1049,5 +1056,13 @@ public class DotsAndBoxes extends MCGame {
 	
 	public boolean isTerminal(GameState state){
 		return state.equals(terminalState);
+	}
+	
+	public int defaultAction(GameState state){
+		int[] actions = getAllActions(state, edges);
+
+		int next = r.nextInt(actions.length);
+
+		return actions[next];
 	}
 }

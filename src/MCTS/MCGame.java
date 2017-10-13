@@ -60,4 +60,6 @@ public abstract class MCGame {
 	public abstract boolean equals(MCGame game);
 	
 	public abstract boolean isTerminal(GameState state);
+	
+	public abstract int defaultAction(GameState state);
 }

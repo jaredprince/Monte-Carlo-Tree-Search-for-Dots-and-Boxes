@@ -96,7 +96,7 @@ public class MCNode {
 	 */
 	public int getNextAction(double c) {
 
-		int action = -1;
+		int action = links[0].action;
 		double max = links[0].getValue(false);
 
 		/* find the action with the largest average reward W(s,a) */

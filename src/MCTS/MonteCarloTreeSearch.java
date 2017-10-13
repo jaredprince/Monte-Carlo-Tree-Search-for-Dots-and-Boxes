@@ -320,9 +320,16 @@ public class MonteCarloTreeSearch {
 		} else {
 			if(opponent == 1){
 				game2 = new DotsAndBoxes(height, width, scored2, sym2);
-				competition(tree, game, tree2, game2, sims1, sims2, matches);
+				
+				tree = game.scored ? new MCTree(game, new GameStateScored(0, 0)) : new MCTree(game, new GameState(0));
+				tree2 = game2.scored ? new MCTree(game2, new GameStateScored(0, 0)) : new MCTree(game2, new GameState(0));
+				
+				MCPlayer p1 = new MCPlayer(game, tree);
+				MCPlayer p2 = new MCPlayer(game2, tree2);
+				
+				competition(p1, p2, sims1, sims2, matches);
 			} else {
-				competition(tree, game, null, null, sims1, sims2, matches);
+//				competition(tree, game, null, null, sims1, sims2, matches);
 			}
 		}
 
@@ -361,7 +368,7 @@ public class MonteCarloTreeSearch {
 	 * @param matches
 	 *            The number of games to be played.
 	 */
-	public static void competition(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2,
+	public static void competition(MCPlayer p1, MCPlayer p2,
 			int simulationsPerTurn1, int simulationsPerTurn2, int matches) /*throws MPIException*/ {
 		int wins = 0;
 		int losses = 0;
@@ -372,7 +379,7 @@ public class MonteCarloTreeSearch {
 
 		/* plays a match */
 		for (int i = matches; i > 0; i--) {
-			double[] results = match(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2, false);
+			double[] results = match(p1, p2, simulationsPerTurn1, simulationsPerTurn2, false);
 			int result = (int) results[0];
 			totalAveDepth += results[1];
 			totalNodes += results[2];
@@ -406,14 +413,6 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Plays a single game between two MCTS players.
 	 * 
-	 * @param tree
-	 *            The tree for player one.
-	 * @param game
-	 *            The game for player one.
-	 * @param tree2
-	 *            The tree for player two.
-	 * @param game2
-	 *            The game for player two.
 	 * @param simulationsPerTurn1
 	 *            The number of simulations given to player one.
 	 * @param simulationsPerTurn2
@@ -422,11 +421,7 @@ public class MonteCarloTreeSearch {
 	 * @return An array of the form {result, average depth of the final tree for
 	 *         player one, number of nodes in the final tree for player one}.
 	 */
-	public static double[] match(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2,
-			int simulationsPerTurn1, int simulationsPerTurn2, boolean parallel) /*throws MPIException*/ {
-
-		tree = game.scored ? new MCTree(game, new GameStateScored(0, 0)) : new MCTree(game, new GameState(0));
-		tree2 = game2.scored ? new MCTree(game2, new GameStateScored(0, 0)) : new MCTree(game2, new GameState(0));
+	public static double[] match(MCPlayer p1, MCPlayer p2, int simulationsPerTurn1, int simulationsPerTurn2, boolean parallel) /*throws MPIException*/ {
 
 		int result = -10;
 
@@ -441,13 +436,13 @@ public class MonteCarloTreeSearch {
 //				result = testGameParallel(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
 			}
 			else
-				result = testGame(tree, game, tree2, game2, simulationsPerTurn1, simulationsPerTurn2);
+				result = testGame(p1, p2, simulationsPerTurn1, simulationsPerTurn2);
 		}
 
 		double results[] = new double[3];
 		results[0] = result;
-		results[1] = (double) tree.totalDepth / tree.numNodes;
-		results[2] = tree.numNodes;
+		results[1] = (double) p1.tree.totalDepth / p1.tree.numNodes;
+		results[2] = p1.tree.numNodes;
 
 		return results;
 	}
@@ -455,37 +450,18 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Plays a single game between two MCTS players.
 	 * 
-	 * @param tree
-	 *            The tree for player one.
-	 * @param game
-	 *            The game for player one.
-	 * @param tree2
-	 *            The tree for player two.
-	 * @param game2
-	 *            The game for player two.
 	 * @param simulationsPerTurn1
 	 *            The number of simulations given to player one.
 	 * @param simulationsPerTurn2
 	 *            The number of simulations given to player two.
 	 * @return An integer representing the result for player one.
 	 */
-	public static int testGame(MCTree tree, DotsAndBoxes game, MCTree tree2, DotsAndBoxes game2,
+	public static int testGame(MCPlayer p1, MCPlayer p2,
 			int simulationsPerTurn1, int simulationsPerTurn2) {
-
-		GameState terminalState = null;
-
-		if (edges > 60) {
-			terminalState = new GameState(new BigInteger("2").pow(edges).subtract(new BigInteger("1")));
-		} else {
-			terminalState = new GameState((long) Math.pow(2, edges) - 1);
-		}
-
-		// the current node of each tree
-		MCNode currentNode = tree.root;
-		MCNode currentNode2 = tree2.root;
 
 		// the game variables
 		int action = 0;
+		
 		boolean playerOneTurn = true;
 		int p1Score = 0;
 		int p2Score = 0;
@@ -498,10 +474,10 @@ public class MonteCarloTreeSearch {
 		
 		//a clone to pass to the simulate method
 		int[] boardClone = new int[width * height];
-
+		
 		// for every turn
-		while (!currentNode.state.equals(terminalState)) {
-
+		while (!p1.isTerminal()) {
+			
 			if (p1Score > (width * width) / 2 || p2Score > (width * width) / 2) {
 				break;
 			}
@@ -510,29 +486,31 @@ public class MonteCarloTreeSearch {
 
 			// get the action based on the current player
 			if (playerOneTurn) {
+				
 				long start = System.currentTimeMillis();
 
 				// perform the simulations for this move
 				while (sims > 0) {
 					// give player one's game, tree, node, and score
-					simulate(currentNode.state, p1Score - p2Score, currentNode, terminalState, tree, game, boardClone, twoOrFour);
+					simulate(p1, p1Score - p2Score, boardClone, twoOrFour);
 					sims--;
 				}
 
 				long end = System.currentTimeMillis();
-				times[currentNode.depth][1]++;
-				times[currentNode.depth][0] = times[currentNode.depth][0] + (end - start);
+				times[p1.currentNode.depth][1]++;
+				times[p1.currentNode.depth][0] = times[p1.currentNode.depth][0] + (end - start);
 				
-				action = currentNode.getNextAction(0);
+				action = p1.getAction();
 			} else {
+				
 				// perform the simulations for this move
 				while (sims > 0) {
 					// give player two's game, tree, node, and score
-					simulate(currentNode2.state, p2Score - p1Score, currentNode2, terminalState, tree2, game2, boardClone, twoOrFour);
+					simulate(p2, p2Score - p1Score, boardClone, twoOrFour);
 					sims--;
 				}
 
-				action = currentNode2.getNextAction(0);
+				action = p2.getAction();
 			}
 			
 			// get the points for this move
@@ -553,78 +531,66 @@ public class MonteCarloTreeSearch {
 			
 			//if both players are symmetrical or both are asymmetrical, the same moves are possible for each
 			if(game.asymmetrical == game2.asymmetrical){
-				// update the currentNodes
-				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-				currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+				//each player should play the given action
+				p1.play(action, BEHAVIOR_EXPANSION_ALWAYS);
+				p2.play(action, BEHAVIOR_EXPANSION_ALWAYS);
 			}
 			
-			else if(playerOneTurn){
-				if(!game.asymmetrical){
-					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-					currentNode2 = currentNode2.getNode(game.removeSymmetries(currentNode.state), BEHAVIOR_EXPANSION_ALWAYS);
-				}
-				
-				else {
-					//get the transformation from player one to player two
-					int rotation = game2.getRotation(currentNode2.state, currentNode.state);
-					int newAction = 0;
-					
-					//get the action which will make player one's (canon) board match player two's
-					switch(rotation){
-						case 1: newAction = game2.getTransformedAction(action, 1, false); break;
-						case 2: newAction = game2.getTransformedAction(action, 2, false); break;
-						case 3: newAction = game2.getTransformedAction(action, 3, false); break;
-						case 4: newAction = game2.getTransformedAction(action, 0, true); break;
-						case 5: newAction = game2.getTransformedAction(action, 1, true); break;
-						case 6: newAction = game2.getTransformedAction(action, 2, true); break;
-						case 7: newAction = game2.getTransformedAction(action, 3, true); break;
-						default: newAction = action;
-					}
-					
-					currentNode2 = currentNode2.getNode(newAction, BEHAVIOR_EXPANSION_ALWAYS);
-					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-				}
-			}
-			
-			else {
-				if(!game2.asymmetrical){
-					currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-					currentNode = currentNode.getNode(game2.removeSymmetries(currentNode2.state), BEHAVIOR_EXPANSION_ALWAYS);
-				}
-				
-				else {
-					//get the transformation from player one to player two
-					int rotation = game.getRotation(currentNode.state, currentNode2.state);
-					int newAction = 0;
-					
-					//get the action which will make player one's (canon) board match player two's
-					switch(rotation){
-						case 1: newAction = game.getTransformedAction(action, 1, false); break;
-						case 2: newAction = game.getTransformedAction(action, 2, false); break;
-						case 3: newAction = game.getTransformedAction(action, 3, false); break;
-						case 4: newAction = game.getTransformedAction(action, 0, true); break;
-						case 5: newAction = game.getTransformedAction(action, 1, true); break;
-						case 6: newAction = game.getTransformedAction(action, 2, true); break;
-						case 7: newAction = game.getTransformedAction(action, 3, true); break;
-						default: newAction = action;
-					}
-					
-					currentNode = currentNode.getNode(newAction, BEHAVIOR_EXPANSION_ALWAYS);
-					currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
-				}
-			}
-			
-			/* possibly circumvent the null pointer */
-			if (currentNode == null || currentNode2 == null) {
-				System.out.println("Null Error: " + (currentNode == null ? "Player 1" : "Player 2"));				
-				return -10;
-			}
-			
-			//catch errors between symmetrical and asymmetrical players
-			if(!game.removeSymmetries(currentNode.state).equals(game2.removeSymmetries(currentNode2.state))){
-				System.out.println("Move Error: " + (playerOneTurn ? "Player 1" : "Player 2"));
-				return -10;
-			}
+//			else if(playerOneTurn){
+//				if(!game.asymmetrical){
+//					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//					currentNode2 = currentNode2.getNode(game.removeSymmetries(currentNode.state), BEHAVIOR_EXPANSION_ALWAYS);
+//				}
+//				
+//				else {
+//					//get the transformation from player one to player two
+//					int rotation = game2.getRotation(currentNode2.state, currentNode.state);
+//					int newAction = 0;
+//					
+//					//get the action which will make player one's (canon) board match player two's
+//					switch(rotation){
+//						case 1: newAction = game2.getTransformedAction(action, 1, false); break;
+//						case 2: newAction = game2.getTransformedAction(action, 2, false); break;
+//						case 3: newAction = game2.getTransformedAction(action, 3, false); break;
+//						case 4: newAction = game2.getTransformedAction(action, 0, true); break;
+//						case 5: newAction = game2.getTransformedAction(action, 1, true); break;
+//						case 6: newAction = game2.getTransformedAction(action, 2, true); break;
+//						case 7: newAction = game2.getTransformedAction(action, 3, true); break;
+//						default: newAction = action;
+//					}
+//					
+//					currentNode2 = currentNode2.getNode(newAction, BEHAVIOR_EXPANSION_ALWAYS);
+//					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//				}
+//			}
+//			
+//			else {
+//				if(!game2.asymmetrical){
+//					currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//					currentNode = currentNode.getNode(game2.removeSymmetries(currentNode2.state), BEHAVIOR_EXPANSION_ALWAYS);
+//				}
+//				
+//				else {
+//					//get the transformation from player one to player two
+//					int rotation = game.getRotation(currentNode.state, currentNode2.state);
+//					int newAction = 0;
+//					
+//					//get the action which will make player one's (canon) board match player two's
+//					switch(rotation){
+//						case 1: newAction = game.getTransformedAction(action, 1, false); break;
+//						case 2: newAction = game.getTransformedAction(action, 2, false); break;
+//						case 3: newAction = game.getTransformedAction(action, 3, false); break;
+//						case 4: newAction = game.getTransformedAction(action, 0, true); break;
+//						case 5: newAction = game.getTransformedAction(action, 1, true); break;
+//						case 6: newAction = game.getTransformedAction(action, 2, true); break;
+//						case 7: newAction = game.getTransformedAction(action, 3, true); break;
+//						default: newAction = action;
+//					}
+//					
+//					currentNode = currentNode.getNode(newAction, BEHAVIOR_EXPANSION_ALWAYS);
+//					currentNode2 = currentNode2.getNode(action, BEHAVIOR_EXPANSION_ALWAYS);
+//				}
+//			}
 
 			if (playerOneTurn) {
 				p1Score += taken;
@@ -680,28 +646,22 @@ public class MonteCarloTreeSearch {
 	 * Plays the game from a given point off the tree with a random default
 	 * policy. This is the playout stage of simulation.
 	 * 
-	 * @param state
-	 *            The starting state.
 	 * @param playerOne
 	 *            True if player one is to move, false otherwise.
 	 * @param p1Net
 	 *            The starting net score for player one.
-	 * @param terminalState
-	 *            The state at which simulation will cease.
 	 * @return An integer representing the result for player one (-1 for a loss,
 	 *         0 for a tie, and 1 for a win).
 	 */
-	public static int simulateDefault(GameState state, boolean playerOne, int p1Net, GameState terminalState) {
+	public static int simulateDefault(MCPlayer player, boolean playerOne, int p1Net) {
 
 		/* play until the terminalState */
+		while (!player.isTerminalTemp()) {
 
-		for (int i = 0; i < edges; i++) {
-
-			//get a random action
-			int action = randomPolicy(state);
-			state = game.getSimpleSuccessorState(state, action);
-
-			int taken = game.completedBoxesForEdge(action, state);
+			//get and play a default action
+			int action = player.playDefaultAction();
+			
+			int taken = game.completedBoxesForEdge(action, player.state);
 
 			if (taken > 0) {
 				p1Net += playerOne ? taken : -taken;
@@ -709,10 +669,6 @@ public class MonteCarloTreeSearch {
 
 			else {
 				playerOne = !playerOne;
-			}
-
-			if (state.equals(terminalState)) {
-				break;
 			}
 		}
 
@@ -724,52 +680,43 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Runs a single simulation and updates the tree accordingly. The majority
 	 * of this method constitutes the selection stage of simulation.
+	 * @param player 
 	 * 
-	 * @param state
-	 *            The starting state.
 	 * @param p1Net
 	 *            The starting net score for player one.
-	 * @param pastNode
-	 *            A node representing the current position on the tree.
 	 * @param terminalState
 	 *            The state at which simulation will cease.
-	 * @param tree
-	 *            The tree to be used and updated. This tree should belong to
-	 *            the player running the simulation.
-	 * @param game
-	 *            The game to be used. This game should belong to the player
-	 *            running the simulation.
 	 * @param board An array representing the number of edges taken for each box.
 	 * @param twoOrFour The number of boxes which have either 2 or 4 edges.
 	 */
-	public static void simulate(GameState state, int p1Net, MCNode pastNode, GameState terminalState, MCTree tree,
-			DotsAndBoxes game, int[] board, int twoOrFour) {
+	public static void simulate(MCPlayer player, int p1Net, int[] board, int twoOrFour) {
 		boolean playerOne = true;
 
 		int action = 0;
 		boolean[] turns = new boolean[edges];
 		int[] actionsTaken = new int[edges + 1];
 
+		//change nodes
+		player.tempNode = player.currentNode;
+		
 		/* keep track of the traversed nodes */
 		MCNode[] playedNodes = new MCNode[edges];
-		MCNode currentNode = pastNode;
 
-		playedNodes[0] = currentNode;
+		playedNodes[0] = player.tempNode;
 
 		/* plays each move until game over or off the tree */
-		for (int i = 0; !state.equals(terminalState); i++) {
+		for (int i = 0; (!player.isOffTreeTemp() && !player.isTerminalTemp()); i++) {
 
 			turns[i] = playerOne ? true : false;
 
 			/* make a move */
-			action = currentNode.getNextAction(c);
-			currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_STANDARD);
+			action = player.getActionTemp();
+			player.playTemp(action, BEHAVIOR_EXPANSION_ALWAYS);
 
 			actionsTaken[i] = action;
 
 			/* if someone has more than half the squares, quit early */
 			if (p1Net > (height * width) / 2 || p1Net < (-height * width) / 2) {
-				state = terminalState;
 				break;
 			}
 
@@ -787,20 +734,9 @@ public class MonteCarloTreeSearch {
 				}
 			}
 
-			if (currentNode != null) {
-				state = currentNode.state;
-			}
-
-			else {
-				/* this casts a scored state to unscored, but since it just
-				 * feeds into simulateDefault, it doesn't matter
-				 */
-				state = game.getSuccessorState(state, action);
-			}
-
 			/* doesn't add the terminal node */
-			if (!state.equals(terminalState)) {
-				playedNodes[i + 1] = currentNode;
+			if (!player.isTerminalTemp()) {
+				playedNodes[i + 1] = player.tempNode;
 			}
 
 			if (taken > 0) {
@@ -811,16 +747,13 @@ public class MonteCarloTreeSearch {
 				playerOne = !playerOne;
 			}
 
-			if (currentNode == null) {
-				break;
-			}
 		}
 
 		int z; /* the result */
 
 		/* playout if not at terminal state */
-		if (!state.equals(terminalState)) {
-			z = simulateDefault(state, playerOne, p1Net, terminalState);
+		if (!player.isTerminalTemp() && player.isOffTreeTemp()) {
+			z = simulateDefault(player, playerOne, p1Net);
 		}
 
 		else {
