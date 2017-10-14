@@ -1,6 +1,5 @@
 package MCTS;
 
-import java.math.BigInteger;
 import java.util.Random;
 //import mpi.*;
 
@@ -352,15 +351,9 @@ public class MonteCarloTreeSearch {
 
 	/**
 	 * Plays a number of games between two MCTS players.
+	 * @param p1 The first player.
+	 * @param p2 The second player.
 	 * 
-	 * @param tree
-	 *            The tree for player one.
-	 * @param game
-	 *            The game for player one.
-	 * @param tree2
-	 *            The tree for player two.
-	 * @param game2
-	 *            The game for player two.
 	 * @param simulationsPerTurn1
 	 *            The number of simulations given to player one.
 	 * @param simulationsPerTurn2
@@ -412,6 +405,8 @@ public class MonteCarloTreeSearch {
 
 	/**
 	 * Plays a single game between two MCTS players.
+	 * @param p1 The first player.
+	 * @param p2 The second player.
 	 * 
 	 * @param simulationsPerTurn1
 	 *            The number of simulations given to player one.
@@ -449,6 +444,8 @@ public class MonteCarloTreeSearch {
 
 	/**
 	 * Plays a single game between two MCTS players.
+	 * @param p1 The first player.
+	 * @param p2 The second player.
 	 * 
 	 * @param simulationsPerTurn1
 	 *            The number of simulations given to player one.
@@ -645,6 +642,7 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Plays the game from a given point off the tree with a random default
 	 * policy. This is the playout stage of simulation.
+	 * @param player The player which is simulating.
 	 * 
 	 * @param playerOne
 	 *            True if player one is to move, false otherwise.
@@ -656,7 +654,7 @@ public class MonteCarloTreeSearch {
 	public static int simulateDefault(MCPlayer player, boolean playerOne, int p1Net) {
 
 		/* play until the terminalState */
-		while (!player.isTerminalTemp()) {
+		while (!player.isTerminal()) {
 
 			//get and play a default action
 			int action = player.playDefaultAction();
@@ -680,12 +678,10 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Runs a single simulation and updates the tree accordingly. The majority
 	 * of this method constitutes the selection stage of simulation.
-	 * @param player 
+	 * @param player The player performing the simulation.
 	 * 
 	 * @param p1Net
 	 *            The starting net score for player one.
-	 * @param terminalState
-	 *            The state at which simulation will cease.
 	 * @param board An array representing the number of edges taken for each box.
 	 * @param twoOrFour The number of boxes which have either 2 or 4 edges.
 	 */
@@ -697,21 +693,21 @@ public class MonteCarloTreeSearch {
 		int[] actionsTaken = new int[edges + 1];
 
 		//change nodes
-		player.tempNode = player.currentNode;
+		player.setMode(true);
 		
 		/* keep track of the traversed nodes */
 		MCNode[] playedNodes = new MCNode[edges];
 
-		playedNodes[0] = player.tempNode;
+		playedNodes[0] = player.currentNode;
 
 		/* plays each move until game over or off the tree */
-		for (int i = 0; (!player.isOffTreeTemp() && !player.isTerminalTemp()); i++) {
+		for (int i = 0; (!player.isOffTree() && !player.isTerminal()); i++) {
 
 			turns[i] = playerOne ? true : false;
 
 			/* make a move */
-			action = player.getActionTemp();
-			player.playTemp(action, BEHAVIOR_EXPANSION_ALWAYS);
+			action = player.getAction();
+			player.play(action, BEHAVIOR_EXPANSION_ALWAYS);
 
 			actionsTaken[i] = action;
 
@@ -735,8 +731,8 @@ public class MonteCarloTreeSearch {
 			}
 
 			/* doesn't add the terminal node */
-			if (!player.isTerminalTemp()) {
-				playedNodes[i + 1] = player.tempNode;
+			if (!player.isTerminal()) {
+				playedNodes[i + 1] = player.currentNode;
 			}
 
 			if (taken > 0) {
@@ -752,7 +748,7 @@ public class MonteCarloTreeSearch {
 		int z; /* the result */
 
 		/* playout if not at terminal state */
-		if (!player.isTerminalTemp() && player.isOffTreeTemp()) {
+		if (!player.isTerminal() && player.isOffTree()) {
 			z = simulateDefault(player, playerOne, p1Net);
 		}
 
@@ -762,6 +758,8 @@ public class MonteCarloTreeSearch {
 
 		/* backup the nodes */
 		backup(playedNodes, turns, actionsTaken, z);
+		
+		player.setMode(false);
 	}
 
 	/**
@@ -777,67 +775,6 @@ public class MonteCarloTreeSearch {
 		int next = r.nextInt(actions.length);
 
 		return actions[next];
-	}
-
-	/**
-	 * Plays a single game using the tree developed for player one.
-	 * 
-	 * @param random
-	 *            True if random moves should be made during player two's turn.
-	 *            False if both players should make moves from the same tree.
-	 * @return True if player one wins the game, false otherwise.
-	 */
-	public static boolean testPolicy(boolean random) {
-		int p1Net = 0;
-		GameState state = new GameState(0);
-		int action = 0;
-		boolean playerOne = true;
-
-		MCNode currentNode = tree.root;
-
-		/* for every move in the game */
-		for (int i = 0; i < edges; i++) {
-
-			/* for a random player or when off the tree */
-			if ((random && !playerOne) || currentNode == null) {
-
-				action = randomPolicy(state);
-
-				if (currentNode != null) {
-					currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_STANDARD);
-				}
-			}
-
-			else {
-				/* get the next node, given c */
-				action = currentNode.getNextAction(c);
-				currentNode = currentNode.getNode(action, BEHAVIOR_EXPANSION_STANDARD);
-			}
-
-			if (currentNode != null) {
-				state = currentNode.state;
-			}
-
-			else {
-				state = game.getSuccessorState(state, action);
-			}
-
-			int taken = game.completedBoxesForEdge(action, state);
-
-			if (taken > 0) {
-				p1Net += playerOne ? taken : -taken;
-			}
-
-			else {
-				playerOne = !playerOne;
-			}
-		}
-
-		if (p1Net > 0) {
-			return true;
-		}
-
-		return false;
 	}
 	
 	/*-----------------------------------Parallel MCTS----------------------------------------------*/

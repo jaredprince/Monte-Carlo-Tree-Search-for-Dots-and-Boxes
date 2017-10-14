@@ -10,6 +10,8 @@ public class MCPlayer {
 	
 	public GameState state;
 	
+	public boolean simulation = false;
+	
 	public int score = 0;
 	
 	public double c;
@@ -21,12 +23,26 @@ public class MCPlayer {
 		currentNode = tree.root;
 	}
 	
-	public int getAction(){
-		return currentNode.getNextAction(c);
+	public boolean setMode(boolean simulation){
+		if(this.simulation == simulation){
+			return false;
+		}
+		
+		else if (simulation) {
+			tempNode = currentNode;
+		}
+		
+		else {
+			currentNode = tempNode;
+		}
+		
+		this.simulation = !this.simulation;
+		
+		return true;
 	}
 	
-	public int getActionTemp(){
-		return tempNode.getNextAction(c);
+	public int getAction(){
+		return currentNode.getNextAction(c);
 	}
 	
 	public void play(int action, int behavior){
@@ -39,16 +55,6 @@ public class MCPlayer {
 		currentNode = node;
 	}
 	
-	public void playTemp(int action, int behavior){
-		MCNode node = tempNode.getNode(action, behavior);
-
-		if(node == null){
-			state = tempNode.state;
-		}
-		
-		tempNode = node;
-	}
-	
 	public boolean isTerminal(){
 		if(currentNode == null){
 			return game.isTerminal(state);
@@ -57,20 +63,8 @@ public class MCPlayer {
 		return game.isTerminal(currentNode.state);
 	}
 	
-	public boolean isTerminalTemp(){
-		if(tempNode == null){
-			return game.isTerminal(state);
-		}
-		
-		return game.isTerminal(tempNode.state);
-	}
-	
 	public boolean isOffTree(){
 		return currentNode == null;
-	}
-	
-	public boolean isOffTreeTemp(){
-		return tempNode == null;
 	}
 	
 	public int playDefaultAction(){
