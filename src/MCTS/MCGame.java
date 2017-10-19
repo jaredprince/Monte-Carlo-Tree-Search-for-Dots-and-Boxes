@@ -62,4 +62,8 @@ public abstract class MCGame {
 	public abstract boolean isTerminal(GameState state);
 	
 	public abstract int defaultAction(GameState state);
+	
+	public int gameLength(){
+		return 30;
+	}
 }

@@ -12,8 +12,6 @@ public class MCPlayer {
 	
 	public boolean simulation = false;
 	
-	public int score = 0;
-	
 	public double c;
 	
 	public MCPlayer(MCGame game, MCTree tree){

@@ -742,7 +742,7 @@ public class DotsAndBoxes extends MCGame {
 			returnState = new GameState(newState);
 		}
 		
-		else if(edges - action - 2 > 61){
+		else if(edges - action - 2 > 60){
 			BigInteger newState = new BigInteger(Long.toString(state.longState));
 			newState = newState.flipBit(edges - action - 1);
 			returnState = new GameState(newState);
@@ -802,57 +802,11 @@ public class DotsAndBoxes extends MCGame {
 			}
 		}
 		
+		if(state instanceof GameStateScored){
+			return new GameStateScored(returnState, ((GameStateScored) state).playerNetScore, true);
+		}
+		
 		return new GameState(returnState, true);
-	}
-	
-	/**
-	 * Gets the asymmetrical canonical representation of a given state.
-	 * The canonical representation is the one whose integer value is smallest.
-	 * 
-	 * @param  state The state to transform.
-	 * @return The canonical representation of state.
-	 */
-	public GameStateScored removeSymmetries(GameStateScored state){
-		
-		String stateString = state.getBinaryString();
-		
-		/* add extra leading zeros */
-		int b = stateString.length();
-		for (int index = 0; index < (edges - b); index++) {
-			stateString = "0" + stateString;
-		}
-		
-		String returnState = stateString;
-		
-		/* three rotations */
-		
-		for(int j = 0; j < 3; j++){
-			stateString = rotate(stateString);
-
-			if(!binaryMax(stateString, returnState)){
-				returnState = stateString;
-			}
-		}
-		
-		/* one reflection */
-		
-		stateString = reflect(stateString);
-		
-		if(!binaryMax(stateString, returnState)){
-			returnState = stateString;
-		}
-
-		/* three more rotations */
-		
-		for(int j = 0; j < 3; j++){
-			stateString = rotate(stateString);
-			
-			if(!binaryMax(stateString, returnState)){
-				returnState = stateString;
-			}
-		}
-		
-		return new GameStateScored(returnState, state.playerNetScore, true);
 	}
 	
 	/**
@@ -1064,5 +1018,9 @@ public class DotsAndBoxes extends MCGame {
 		int next = r.nextInt(actions.length);
 
 		return actions[next];
+	}
+	
+	public int gameLength(){
+		return edges;
 	}
 }
