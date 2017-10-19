@@ -1,5 +1,6 @@
 package MCTS;
 
+import java.util.Arrays;
 import java.util.Random;
 //import mpi.*;
 
@@ -34,34 +35,29 @@ public class MonteCarloTreeSearch {
 	static int height;
 
 	/**
-	 * The number of edges on the board.
-	 */
-	static int edges;
-
-	/**
 	 * The uncertainty constant.
 	 */
 	static double c;
 
-	/**
-	 * The game to use for player one.
-	 */
-	static DotsAndBoxes game = new DotsAndBoxes(2, 2, false, false);
-
-	/**
-	 * The game to use for player two.
-	 */
-	static DotsAndBoxes game2;
-
-	/**
-	 * The tree of player one.
-	 */
-	static MCTree tree;
-
-	/**
-	 * The tree of player two.
-	 */
-	static MCTree tree2;
+//	/**
+//	 * The game to use for player one.
+//	 */
+//	static DotsAndBoxes game = new DotsAndBoxes(2, 2, false, false);
+//
+//	/**
+//	 * The game to use for player two.
+//	 */
+//	static DotsAndBoxes game2;
+//
+//	/**
+//	 * The tree of player one.
+//	 */
+//	static MCTree tree;
+//
+//	/**
+//	 * The tree of player two.
+//	 */
+//	static MCTree tree2;
 
 	/**
 	 * A 2D array representing the times taken for each move made by player one.
@@ -299,9 +295,8 @@ public class MonteCarloTreeSearch {
 		
 		/* All parameters present and valid - Game can begin */
 		
-		edges = (height * (width + 1)) + (width * (height + 1));
-		times = new long[edges][2];
-		game = new DotsAndBoxes(height, width, scored1, sym1);
+//		times = new long[edges][2];
+		DotsAndBoxes game = new DotsAndBoxes(height, width, scored1, sym1);
 		
 		if(parallel){
 //			game2 = new DotsAndBoxes(height, width, scored1, sym1);
@@ -318,10 +313,10 @@ public class MonteCarloTreeSearch {
 //			}
 		} else {
 			if(opponent == 1){
-				game2 = new DotsAndBoxes(height, width, scored2, sym2);
+				DotsAndBoxes game2 = new DotsAndBoxes(height, width, scored2, sym2);
 				
-				tree = game.scored ? new MCTree(game, new GameStateScored(0, 0)) : new MCTree(game, new GameState(0));
-				tree2 = game2.scored ? new MCTree(game2, new GameStateScored(0, 0)) : new MCTree(game2, new GameState(0));
+				MCTree tree = game.scored ? new MCTree(game, new GameStateScored(0, 0)) : new MCTree(game, new GameState(0));
+				MCTree tree2 = game2.scored ? new MCTree(game2, new GameStateScored(0, 0)) : new MCTree(game2, new GameState(0));
 				
 				MCPlayer p1 = new MCPlayer(game, tree);
 				MCPlayer p2 = new MCPlayer(game2, tree2);
@@ -388,19 +383,19 @@ public class MonteCarloTreeSearch {
 
 		/* Results */
 		System.out.println(height + "x" + width + " c=" + c + " matches=" + matches + " sims=" + simulationsPerTurn1
-				+ "," + simulationsPerTurn2 + " p1=" + (game.scored ? "sc+" : "nsc+")
-				+ (game.asymmetrical ? "s" : "ns") + " p2=" + (game2.scored ? "sc+" : "nsc+")
-				+ (game2.asymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
+				+ "," + simulationsPerTurn2 + " p1=" + (((DotsAndBoxes)p1.game).scored ? "sc+" : "nsc+")
+				+ (((DotsAndBoxes)p1.game).asymmetrical ? "s" : "ns") + " p2=" + (((DotsAndBoxes)p2.game).scored ? "sc+" : "nsc+")
+				+ (((DotsAndBoxes)p2.game).asymmetrical ? "s" : "ns") + " w=" + wins + " l=" + losses + " d=" + draws);
 		System.out.println("Average nodes: " + totalNodes / matches);
 		System.out.println("average depth: " + (totalAveDepth / matches) + "\nAverage Time: ");
 
-		for (int i = 0; i < times.length; i++) {
-			if (times[i][1] == 0) {
-				continue;
-			}
-
-			System.out.println("Move " + i + ": " + times[i][0] / times[i][1]);
-		}
+//		for (int i = 0; i < times.length; i++) {
+//			if (times[i][1] == 0) {
+//				continue;
+//			}
+//
+//			System.out.println("Move " + i + ": " + times[i][0] / times[i][1]);
+//		}
 	}
 
 	/**
@@ -494,8 +489,8 @@ public class MonteCarloTreeSearch {
 				}
 
 				long end = System.currentTimeMillis();
-				times[p1.currentNode.depth][1]++;
-				times[p1.currentNode.depth][0] = times[p1.currentNode.depth][0] + (end - start);
+//				times[p1.currentNode.depth][1]++;
+//				times[p1.currentNode.depth][0] = times[p1.currentNode.depth][0] + (end - start);
 				
 				action = p1.getAction();
 			} else {
@@ -514,20 +509,20 @@ public class MonteCarloTreeSearch {
 			int taken = 0;
 			
 			// increment the edges for each box which adjoins action
-			for(int i = 0; i < game.edgeBoxes[action].length; i++){
-				board[game.edgeBoxes[action][i]]++;
-				boardClone[game.edgeBoxes[action][i]]++;
+			for(int i = 0; i < ((DotsAndBoxes)p1.game).edgeBoxes[action].length; i++){
+				board[((DotsAndBoxes)p1.game).edgeBoxes[action][i]]++;
+				boardClone[((DotsAndBoxes)p1.game).edgeBoxes[action][i]]++;
 				
-				if(board[game.edgeBoxes[action][i]] == 4){
+				if(board[((DotsAndBoxes)p1.game).edgeBoxes[action][i]] == 4){
 					taken++;
 					twoOrFour++;
-				} else if (board[game.edgeBoxes[action][i]] == 2){
+				} else if (board[((DotsAndBoxes)p1.game).edgeBoxes[action][i]] == 2){
 					twoOrFour++;
 				}
 			}
 			
 			//if both players are symmetrical or both are asymmetrical, the same moves are possible for each
-			if(game.asymmetrical == game2.asymmetrical){
+			if(((DotsAndBoxes)p1.game).asymmetrical == ((DotsAndBoxes)p2.game).asymmetrical){
 				//each player should play the given action
 				p1.play(action, BEHAVIOR_EXPANSION_ALWAYS);
 				p2.play(action, BEHAVIOR_EXPANSION_ALWAYS);
@@ -642,6 +637,7 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Plays the game from a given point off the tree with a random default
 	 * policy. This is the playout stage of simulation.
+	 * 
 	 * @param player The player which is simulating.
 	 * 
 	 * @param playerOne
@@ -659,7 +655,7 @@ public class MonteCarloTreeSearch {
 			//get and play a default action
 			int action = player.playDefaultAction();
 			
-			int taken = game.completedBoxesForEdge(action, player.state);
+			int taken = ((DotsAndBoxes) player.game).completedBoxesForEdge(action, player.state);
 
 			if (taken > 0) {
 				p1Net += playerOne ? taken : -taken;
@@ -678,25 +674,27 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Runs a single simulation and updates the tree accordingly. The majority
 	 * of this method constitutes the selection stage of simulation.
+	 * 
 	 * @param player The player performing the simulation.
 	 * 
 	 * @param p1Net
-	 *            The starting net score for player one.
+	 *            The current net score for the player.
 	 * @param board An array representing the number of edges taken for each box.
 	 * @param twoOrFour The number of boxes which have either 2 or 4 edges.
 	 */
 	public static void simulate(MCPlayer player, int p1Net, int[] board, int twoOrFour) {
 		boolean playerOne = true;
-
+		int gameLength = player.game.gameLength();
+		
 		int action = 0;
-		boolean[] turns = new boolean[edges];
-		int[] actionsTaken = new int[edges + 1];
+		boolean[] turns = new boolean[gameLength];
+		int[] actionsTaken = new int[gameLength + 1];
 
 		//change nodes
 		player.setMode(true);
 		
 		/* keep track of the traversed nodes */
-		MCNode[] playedNodes = new MCNode[edges];
+		MCNode[] playedNodes = new MCNode[gameLength];
 
 		playedNodes[0] = player.currentNode;
 
@@ -719,13 +717,13 @@ public class MonteCarloTreeSearch {
 			int taken = 0;
 			
 			// increment the edges for each box which adjoins action
-			for(int b = 0; b < game.edgeBoxes[action].length; b++){
-				board[game.edgeBoxes[action][b]]++;
+			for(int b = 0; b < ((DotsAndBoxes)player.game).edgeBoxes[action].length; b++){
+				board[((DotsAndBoxes)player.game).edgeBoxes[action][b]]++;
 				
-				if(board[game.edgeBoxes[action][b]] == 4){
+				if(board[((DotsAndBoxes)player.game).edgeBoxes[action][b]] == 4){
 					taken++;
 					twoOrFour++;
-				} else if(board[game.edgeBoxes[action][b]] == 2){
+				} else if(board[((DotsAndBoxes)player.game).edgeBoxes[action][b]] == 2){
 					twoOrFour++;
 				}
 			}
@@ -741,6 +739,14 @@ public class MonteCarloTreeSearch {
 
 			else {
 				playerOne = !playerOne;
+			}
+			
+			//resize the arrays if they are too small
+			if(i + 2 == gameLength){
+				gameLength *= 2;
+				turns = Arrays.copyOf(turns, gameLength);
+				playedNodes = Arrays.copyOf(playedNodes, gameLength);
+				actionsTaken = Arrays.copyOf(actionsTaken, gameLength);
 			}
 
 		}
@@ -760,21 +766,6 @@ public class MonteCarloTreeSearch {
 		backup(playedNodes, turns, actionsTaken, z);
 		
 		player.setMode(false);
-	}
-
-	/**
-	 * Gets a random action from a given state.
-	 * 
-	 * @param state
-	 *            The state from which to select an action.
-	 * @return An integer representing the action selected.
-	 */
-	public static int randomPolicy(GameState state) {
-		int[] actions = DotsAndBoxes.getAllActions(state, edges);
-
-		int next = r.nextInt(actions.length);
-
-		return actions[next];
 	}
 	
 	/*-----------------------------------Parallel MCTS----------------------------------------------*/
