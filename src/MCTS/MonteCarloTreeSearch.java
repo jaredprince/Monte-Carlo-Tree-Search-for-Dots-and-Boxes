@@ -104,6 +104,7 @@ public class MonteCarloTreeSearch {
 	static int maxTasks=2;
 	/*------------------------------------------------------*/
 
+	
 	/**
 	 * @param args
 	 *            width, height, c, matches, sims1, scored1,
