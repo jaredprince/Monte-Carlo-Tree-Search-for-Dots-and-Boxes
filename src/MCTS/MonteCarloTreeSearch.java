@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Random;
 import mpi.*;
 
-//10-26
+//10-23
 
 /**
  * This class runs games using the Monte Carlo tree search.
