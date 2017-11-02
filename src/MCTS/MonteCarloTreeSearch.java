@@ -1189,7 +1189,21 @@ public class MonteCarloTreeSearch {
 				
 				action = currentNode2.getNextAction(0);
 			}
+			
+			if(maxTasks>1){
+				if(rank==0){
 
+					int[] tempAction= {action};
+					MPI.COMM_WORLD.bcast(tempAction, 1, MPI.INT, 0);
+				}
+				if(rank!=0){
+					//this is overriding the action for each compute node with the action selected by the master node
+					int[] tempActionCompute= new int[1];
+					MPI.COMM_WORLD.bcast(tempActionCompute, 1, MPI.INT, 0);
+					action= tempActionCompute[0];
+				}
+			}
+			
 			// get the points for this move
 			int taken = 0;
 			
@@ -1203,20 +1217,6 @@ public class MonteCarloTreeSearch {
 					twoOrFour++;
 				} else if (board[game.edgeBoxes[action][b]] == 2){
 					twoOrFour++;
-				}
-			}
-			
-			if(maxTasks>1){
-				if(rank==0){
-
-					int[] tempAction= {action};
-					MPI.COMM_WORLD.bcast(tempAction, 1, MPI.INT, 0);
-				}
-				if(rank!=0){
-					//this is overriding the action for each compute node with the action selected by the master node
-					int[] tempActionCompute= new int[1];
-					MPI.COMM_WORLD.bcast(tempActionCompute, 1, MPI.INT, 0);
-					action= tempActionCompute[0];
 				}
 			}
 			
