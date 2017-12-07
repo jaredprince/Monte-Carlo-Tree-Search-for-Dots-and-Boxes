@@ -41,12 +41,13 @@ public class MCTree {
 
 	/**
 	 * The number of times an action must be selected from a node before a
-	 * successor is created for that action.
+	 * successor is created for that action (if EXPANSION_STANDARD behavior is used).
 	 */
-	public final static int NODE_CREATION_COUNT = 1;
+	public int nodeCreationCount = 2;
 
 	/**
 	 * The MCTSGame to be used by this tree.
+	 * This is only used by the MCNodes which belong in this tree.
 	 */
 	public MCGame game;
 
@@ -99,6 +100,7 @@ public class MCTree {
 	public MCNode addNode(MCNode node) {
 		MCNode p = nodeTable.get(node.state.getString());
 
+		//if the node doesn't exist in the tree
 		if (p == null) {
 			p = node;
 			nodeTable.put(p.state.getString(), p);
@@ -110,6 +112,7 @@ public class MCTree {
 				maximumDepth = p.depth;
 			}
 		} else {
+			//add to the parents of p because this method is used when creating a child of a node
 			p.parents++;
 		}
 
@@ -125,6 +128,7 @@ public class MCTree {
 	 * @return The node that was deleted or null.
 	 */
 	public MCNode deleteNode(MCNode node) {
+		//delete the node
 		node = nodeTable.remove(node.state.getString());
 
 		if (node != null) {
@@ -147,6 +151,8 @@ public class MCTree {
 	 */
 	public int deleteBranch(MCNode node) {
 		int deleted = 0;
+		
+		//delete this node
 		node = nodeTable.remove(node.state.getString());
 
 		if (node != null) {
@@ -185,18 +191,20 @@ public class MCTree {
 	 *            The tree with which to merge.
 	 */
 	public void merge(MCTree tree) {
-		maximumDepth = Math.max(maximumDepth, tree.maximumDepth);
 
+		//only merge trees with equivalent roots (no subtrees allowed)
 		if (tree.root.equals(root)) {
 			merge(tree, root);
 		}
 		
+		//update the data for the tree
 		updateTreeData();
 	}
 
 	/**
 	 * Recursively merges nodes of this tree with equivalent nodes of the given
-	 * tree. This assumes a topological ordering of the nodes.
+	 * tree. This assumes a topological ordering of the nodes. Nodes lower in the
+	 * tree are merged first.
 	 * 
 	 * @param tree
 	 *            The tree with which to merge.
@@ -204,16 +212,21 @@ public class MCTree {
 	 *            The node (from this tree) currently being merged.
 	 */
 	private void merge(MCTree tree, MCNode node) {
+		//TODO: fix this so that nodes which exist on the new tree but not this one are added
 		
 		MCNode child;
 		
+		//for each child of node
 		for(int i = 0; i < node.links.length; i++){
 			child = node.links[i].child;
+			
 			if(child != null){
+				//recursively merge the child with the equivalent node in this tree
 				child.mergeNode(tree.findNode(child));
 			}
 		}
 		
+		//merge this node with the eqiuvalent node in this tree
 		node.mergeNode(tree.findNode(node));
 	}
 
@@ -229,8 +242,12 @@ public class MCTree {
 
 		MCNode currentNode = root;
 		
-		while(currentNode != null){
+		//until the path moves off the tree or reaches the end
+		while(currentNode != null && !game.isTerminal(currentNode.state)){
+			//add the node to the path
 			path.add(currentNode);
+			
+			//move down the tree, but do not expand
 			currentNode = currentNode.getNode(currentNode.getNextAction(0), MonteCarloTreeSearch.BEHAVIOR_EXPANSION_NEVER);
 		}
 		
@@ -245,6 +262,7 @@ public class MCTree {
 		MCNode node;
 		int depth;
 
+		//for every element
 		while (nodes.hasMoreElements()) {
 			node = (MCNode) nodes.nextElement();
 			numNodes++;
@@ -259,7 +277,6 @@ public class MCTree {
 			if (node.isLeaf) {
 				leaves++;
 			}
-
 		}
 	}
 }

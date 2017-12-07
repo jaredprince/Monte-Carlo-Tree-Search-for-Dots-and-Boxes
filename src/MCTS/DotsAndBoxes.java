@@ -1008,10 +1008,21 @@ public class DotsAndBoxes extends MCGame {
 		return false;
 	}
 	
+	/**
+	 * Checks if the given state is terminal (a state which ends the game).
+	 * 
+	 * @return True if terminal, false otherwise.
+	 */
 	public boolean isTerminal(GameState state){
 		return state.equals(terminalState);
 	}
 	
+	/**
+	 * Gives a default action for the current state.
+	 * 
+	 * @param state The state for which to choose an action.
+	 * @return The action as an integer.
+	 */
 	public int defaultAction(GameState state){
 		int[] actions = getAllActions(state, edges);
 
@@ -1020,6 +1031,12 @@ public class DotsAndBoxes extends MCGame {
 		return actions[next];
 	}
 	
+	/**
+	 * Returns the length the the game.
+	 * The length of the game for Dots and Boxes is the number of edges.
+	 * 
+	 * @return The game length.
+	 */
 	public int gameLength(){
 		return edges;
 	}

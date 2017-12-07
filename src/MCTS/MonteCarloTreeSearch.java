@@ -117,6 +117,8 @@ public class MonteCarloTreeSearch {
 	 *            
 	 *            If parallel:
 	 *            	shareInfoEvery, tasks
+	 *            
+	 *            ex. width=2 height=4 matches=100 sim1=true c=.75 scored1=false sym1=false opponent=2
 	 */
 	public static void main(String[] args) /*throws MPIException*/ {
 

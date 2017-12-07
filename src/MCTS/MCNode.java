@@ -150,7 +150,7 @@ public class MCNode {
 
 				/* Create a new node */
 				else if (behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_ALWAYS
-						|| (links[i].timesChosen >= MCTree.NODE_CREATION_COUNT
+						|| (links[i].timesChosen >= tree.nodeCreationCount
 								&& behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD)) {
 
 					MCNode newNode = createSuccessorNode(action);

@@ -59,11 +59,25 @@ public abstract class MCGame {
 	 */
 	public abstract boolean equals(MCGame game);
 	
+	/**
+	 * Checks if the given state is terminal (a sate which ends the game).
+	 * @param state The state to be checked.
+	 * @return True if terminal, false otherwise.
+	 */
 	public abstract boolean isTerminal(GameState state);
 	
+	/**
+	 * Gives a default action from among the possible actions for the given state.
+	 * @param state The state from which to choose an action.
+	 * @return The action as an integer.
+	 */
 	public abstract int defaultAction(GameState state);
 	
-	public int gameLength(){
-		return 30;
-	}
+	/**
+	 * Gives the length (number of moves) of the game or an average, for games which
+	 * do not have a defined length.
+	 * 
+	 * @return The game length.
+	 */
+	public abstract int gameLength();
 }
