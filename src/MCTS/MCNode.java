@@ -118,6 +118,13 @@ public class MCNode {
 
 		return action;
 	}
+	
+	/**
+	 * @return A random action from the possible actions at this node.
+	 */
+	public int getRandomAction(){
+		return links[Math.abs(r.nextInt() % links.length)].action;
+	}
 
 	/**
 	 * Gets the successor of this node based on the given action.
@@ -143,10 +150,10 @@ public class MCNode {
 
 				/* Create a new node */
 				else if (behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_ALWAYS
-						|| (links[i].timesChosen == MCTree.NODE_CREATION_COUNT
+						|| (links[i].timesChosen >= MCTree.NODE_CREATION_COUNT
 								&& behavior == MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD)) {
 
-					MCNode newNode = getNextNode(action);
+					MCNode newNode = createSuccessorNode(action);
 					links[i].child = tree.addNode(newNode);
 
 					if (!isLeaf) {
@@ -187,7 +194,7 @@ public class MCNode {
 			}
 			
 			else {
-				MCNode child = getNextNode(links[i].action);
+				MCNode child = createSuccessorNode(links[i].action);
 				if(child.state.equals(state)){
 					return getNode(links[i].action, behavior);
 				}
@@ -280,7 +287,7 @@ public class MCNode {
 	 *            An integer representing the action selected.
 	 * @return The newly created node.
 	 */
-	private MCNode getNextNode(int action) {
+	private MCNode createSuccessorNode(int action) {
 		GameState newState = tree.game.getSuccessorState(state, action);
 		return new MCNode(newState, depth + 1, tree.game.getActions(newState), tree);
 	}

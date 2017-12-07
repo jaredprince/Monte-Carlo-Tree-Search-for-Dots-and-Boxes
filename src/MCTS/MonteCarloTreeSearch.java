@@ -41,52 +41,53 @@ public class MonteCarloTreeSearch {
 	 * selected using these constants. All options related to the MCTS algorithm should be defined here.
 	 */
 	
+	public static final int BEHAVIOR_SELECTION_STANDARD = 0;
+	
+	public static final int BEHAVIOR_SELECTION_RANDOM = 1;
+	
 	/**
 	 * Defines the behavior in which node creation is dependent upon NODE_CREATION_COUNT.
 	 */
-	public static final int BEHAVIOR_EXPANSION_STANDARD = 0;
+	public static final int BEHAVIOR_EXPANSION_STANDARD = 2;
 	
 	/**
 	 * Defines the behavior in which a node is created (if the node does not exist already), regardless of NODE_CREATION_COUNT.
 	 */
-	public static final int BEHAVIOR_EXPANSION_ALWAYS = 1;
+	public static final int BEHAVIOR_EXPANSION_ALWAYS = 3;
 	
 	/**
 	 * Defines the behavior in which a node is not created, regardless of NODE_CREATION_COUNT.
 	 */
-	public static final int BEHAVIOR_EXPANSION_NEVER = 2;
+	public static final int BEHAVIOR_EXPANSION_NEVER = 4;
 	
 	/**
 	 * Defines the behavior in which only a single node in a new branch is created when expanding the tree.
-	 * (Unimplemented)
 	 */
-	public static final int BEHAVIOR_EXPANSION_SINGLE = 0;
+	public static final int BEHAVIOR_EXPANSION_NODES_SINGLE = 5;
 	
 	/**
 	 * Defines the behavior in which multiple nodes in a new branch are created when expanding the tree.
-	 * (Unimplemented)
 	 */
-	public static final int BEHAVIOR_EXPANSION_MULTIPLE = 1;
+	public static final int BEHAVIOR_EXPANSION_NODES_MULTIPLE = 6;
 	
 	/**
 	 * Defines the behavior in which all nodes of a new branch are created when expanding the tree.
-	 * (Unimplemented)
 	 */
-	public static final int BEHAVIOR_EXPANSION_FULL = 2;
+	public static final int BEHAVIOR_EXPANSION_NODES_FULL = 7;
 	
 	/**
 	 * Defines the behavior in which unexplored nodes are selected in the order they are tested, and all are selected before 
 	 * any node is selected a second time.
 	 * (Unimplemented)
 	 */
-	public static final int BEHAVIOR_UNEXPLORED_STANDARD = 0;
+	public static final int BEHAVIOR_UNEXPLORED_STANDARD = 8;
 	
 	/**
 	 * Defines the behavior in which unexplored nodes are selected using first play urgency (FPU). FPU gives unexplored nodes
 	 * a constant reward value. This value can be tuned to encourage exploitation in the early game.
 	 * (Unimplemented)
 	 */
-	public static final int BEHAVIOR_UNEXPLORED_FIRST_PLAY_URGENCY = 1;
+	public static final int BEHAVIOR_UNEXPLORED_FIRST_PLAY_URGENCY = 9;
 	
 	/**
 	 * Defines the behaviors to be used during this search.
@@ -496,7 +497,7 @@ public class MonteCarloTreeSearch {
 			
 			//if both players are symmetrical or both are asymmetrical, the same moves are possible for each
 			if(((DotsAndBoxes)p1.game).asymmetrical == ((DotsAndBoxes)p2.game).asymmetrical){
-				//each player should play the given action
+				//each player should play the given action (create nodes always)
 				p1.play(action, BEHAVIOR_EXPANSION_ALWAYS);
 				p2.play(action, BEHAVIOR_EXPANSION_ALWAYS);
 			}
@@ -680,7 +681,9 @@ public class MonteCarloTreeSearch {
 
 			/* make a move */
 			action = player.getAction();
-			player.play(action, BEHAVIOR_EXPANSION_ALWAYS);
+			
+			//play action using player behavior
+			player.play(action);
 
 			actionsTaken[i] = action;
 
