@@ -56,9 +56,19 @@ public class MCPlayer {
 	public static final int EXPANSION_NODES = 2;
 	
 	/**
+	 * The index in the behaviors array representing unexplored node behavior.
+	 */
+	public static final int UNEXPLORED = 3;
+	
+	/**
+	 * The index in the behaviors array representing playout behavior.
+	 */
+	public static final int PLAYOUT = 4;
+	
+	/**
 	 * An array of integers representing the behaviors used by this player.
 	 */
-	public int[] behaviors = {MonteCarloTreeSearch.BEHAVIOR_SELECTION_STANDARD, MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD, MonteCarloTreeSearch.BEHAVIOR_EXPANSION_NODES_SINGLE};
+	public int[] behaviors = {MonteCarloTreeSearch.BEHAVIOR_SELECTION_STANDARD, MonteCarloTreeSearch.BEHAVIOR_EXPANSION_STANDARD, MonteCarloTreeSearch.BEHAVIOR_EXPANSION_NODES_SINGLE, MonteCarloTreeSearch.BEHAVIOR_UNEXPLORED_STANDARD, MonteCarloTreeSearch.BEHAVIOR_PLAYOUT_STANDARD};
 	
 	/**
 	 * The number of nodes to expand is EXPANSION_NODES behavior is multiple.
@@ -131,7 +141,7 @@ public class MCPlayer {
 	public int getAction(){
 		
 		if(behaviors[SELECTION] == MonteCarloTreeSearch.BEHAVIOR_SELECTION_STANDARD){
-			return currentNode.getNextAction(c);
+			return currentNode.getNextAction(c, behaviors[UNEXPLORED]);
 		}
 		
 		else {
@@ -233,8 +243,18 @@ public class MCPlayer {
 	 * @return An integer representing the action played.
 	 */
 	public int playDefaultAction(){
-		int action = game.defaultAction(state);
+		int action;
+		
+		if(behaviors[PLAYOUT] == MonteCarloTreeSearch.BEHAVIOR_PLAYOUT_RULE){
+			//use the game's default method
+			action = game.defaultAction(state);
+		} else {
+			//use a random move
+			action = ((MCGame) game).defaultAction(state);
+		}
+		
 		state = game.getSuccessorState(state, action);
+		
 		return action;
 	}
 }

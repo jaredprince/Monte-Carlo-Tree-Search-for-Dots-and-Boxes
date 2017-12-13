@@ -92,9 +92,10 @@ public class MCNode {
 	 * @param c
 	 *            The uncertainty constant to be applied when calculating the
 	 *            bonuses of each action.
+	 * @param behavior The behavior used for selection.
 	 * @return An integer representing the action selected.
 	 */
-	public int getNextAction(double c) {
+	public int getNextAction(double c, int behavior) {
 
 		int action = links[0].action;
 		double max = links[0].getValue(false);
@@ -132,7 +133,7 @@ public class MCNode {
 	 * @param action
 	 *            An integer representing the action to be made.
 	 * @param behavior
-	 *            Defines under which conditions a node is created.
+	 *            Defines under which conditions a missing node is created.
 	 * 
 	 * @return The successor or null.
 	 */
@@ -175,7 +176,7 @@ public class MCNode {
 	 * @param state
 	 *            The state equivalent to the one needed.
 	 * @param behavior
-	 *            Defines under what condition a node is created.
+	 *            Defines under what condition a missing node is created.
 	 * @return The successor or null.
 	 * 
 	 */

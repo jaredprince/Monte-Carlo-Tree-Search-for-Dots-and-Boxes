@@ -248,7 +248,7 @@ public class MCTree {
 			path.add(currentNode);
 			
 			//move down the tree, but do not expand
-			currentNode = currentNode.getNode(currentNode.getNextAction(0), MonteCarloTreeSearch.BEHAVIOR_EXPANSION_NEVER);
+			currentNode = currentNode.getNode(currentNode.getNextAction(0, MonteCarloTreeSearch.BEHAVIOR_UNEXPLORED_STANDARD), MonteCarloTreeSearch.BEHAVIOR_EXPANSION_NEVER);
 		}
 		
 		return (MCNode[]) path.toArray();

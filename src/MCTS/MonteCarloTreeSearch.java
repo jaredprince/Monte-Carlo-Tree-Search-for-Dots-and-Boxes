@@ -41,8 +41,14 @@ public class MonteCarloTreeSearch {
 	 * selected using these constants. All options related to the MCTS algorithm should be defined here.
 	 */
 	
+	/**
+	 * Defines the behavior in which nodes are selected using UCT during the selection stage.
+	 */
 	public static final int BEHAVIOR_SELECTION_STANDARD = 0;
 	
+	/**
+	 * Defines the behavior in which nodes are selected at random during the selection stage.
+	 */
 	public static final int BEHAVIOR_SELECTION_RANDOM = 1;
 	
 	/**
@@ -78,6 +84,7 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Defines the behavior in which unexplored nodes are selected in the order they are tested, and all are selected before 
 	 * any node is selected a second time.
+	 * 
 	 * (Unimplemented)
 	 */
 	public static final int BEHAVIOR_UNEXPLORED_STANDARD = 8;
@@ -85,14 +92,50 @@ public class MonteCarloTreeSearch {
 	/**
 	 * Defines the behavior in which unexplored nodes are selected using first play urgency (FPU). FPU gives unexplored nodes
 	 * a constant reward value. This value can be tuned to encourage exploitation in the early game.
+	 * 
 	 * (Unimplemented)
 	 */
 	public static final int BEHAVIOR_UNEXPLORED_FIRST_PLAY_URGENCY = 9;
 	
 	/**
-	 * Defines the behaviors to be used during this search.
+	 * Defines the behavior in which moves during the playout stage are selected at random.
 	 */
-	static int[] behaviors = {BEHAVIOR_EXPANSION_STANDARD, BEHAVIOR_UNEXPLORED_STANDARD};
+	public static final int BEHAVIOR_PLAYOUT_STANDARD = 10;
+	
+	/**
+	 * Defines the behavior in which moves during the playout stage are selected based on game-specific heuristics or rules.
+	 * These rules are defined in the MCGame's getDefaultAction method. If the method is not overloaded in the subclass,
+	 * random moves are used.
+	 */
+	public static final int BEHAVIOR_PLAYOUT_RULE = 11;
+	
+	/**
+	 * Defines the behavior in which backpropagation is unweighted (each simulation counts the same).
+	 * 
+	 * (Unimplemented)
+	 */
+	public static final int BEHAVIOR_BACKPROPAGATION_STANDARD = 12;
+	
+	/**
+	 * Defines the behavior in which backpropagation is weighted by the length of the simulation.
+	 * 
+	 * (Unimplemented)
+	 */
+	public static final int BEHAVIOR_BACKPROPAGATION_WEIGHTED_LENGTH = 13;
+	
+	/**
+	 * Defines the behavior in which backpropagation is weighted by the number of previous simulations.
+	 * 
+	 * (Unimplemented)
+	 */
+	public static final int BEHAVIOR_BACKPROPAGATION_WEIGHTED_TIME = 14;
+	
+	/**
+	 * Defines the behavior in which backpropagation is weighted by the final score.
+	 * 
+	 * (Unimplemented)
+	 */
+	public static final int BEHAVIOR_BACKPROPAGATION_WEIGHTED_SCORE = 15;
 	
 	/*------------------Parallel MCTS-----------------------*/
 	/**
@@ -121,7 +164,7 @@ public class MonteCarloTreeSearch {
 	 *            ex. width=2 height=4 matches=100 sim1=true c=.75 scored1=false sym1=false opponent=2
 	 */
 	public static void main(String[] args) /*throws MPIException*/ {
-
+		
 		long s = System.currentTimeMillis();
 		
 		int matches = 0, sims1 = 0, sims2 = 0, opponent = 0;
@@ -577,7 +620,7 @@ public class MonteCarloTreeSearch {
 	}
 
 	/**
-	 * Updates the nodes played in a game. This is the backpropogation stage of
+	 * Updates the nodes played in a game. This is the backpropagation stage of
 	 * the simulation.
 	 * 
 	 * @param nodes
@@ -592,7 +635,7 @@ public class MonteCarloTreeSearch {
 	 *            An integer representing the result for player one (-1 for a
 	 *            loss, 0 for a tie, and 1 for a win).
 	 */
-	public static void backup(MCNode[] nodes, boolean[] player, int[] actions, int result) {
+	public static void backpropagate(MCNode[] nodes, boolean[] player, int[] actions, int result) {
 		for (int i = 0; i < nodes.length; i++) {
 			if (nodes[i] == null) {
 				break;
@@ -625,7 +668,7 @@ public class MonteCarloTreeSearch {
 	 * @return An integer representing the result for player one (-1 for a loss,
 	 *         0 for a tie, and 1 for a win).
 	 */
-	public static int simulateDefault(MCPlayer player, boolean playerOne, int p1Net) {
+	public static int playout(MCPlayer player, boolean playerOne, int p1Net) {
 
 		/* play until the terminalState */
 		while (!player.isTerminal()) {
@@ -735,7 +778,7 @@ public class MonteCarloTreeSearch {
 
 		/* playout if not at terminal state */
 		if (!player.isTerminal() && player.isOffTree()) {
-			z = simulateDefault(player, playerOne, p1Net);
+			z = playout(player, playerOne, p1Net);
 		}
 
 		else {
@@ -743,7 +786,7 @@ public class MonteCarloTreeSearch {
 		}
 
 		/* backup the nodes */
-		backup(playedNodes, turns, actionsTaken, z);
+		backpropagate(playedNodes, turns, actionsTaken, z);
 		
 		player.setMode(false);
 	}

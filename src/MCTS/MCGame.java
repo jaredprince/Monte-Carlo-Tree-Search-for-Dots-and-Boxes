@@ -1,5 +1,7 @@
 package MCTS;
 
+import java.util.Random;
+
 /**
  * The methods to be implemented by any game used for the Monte Carlo tree search.
  * @author      Jared Prince
@@ -71,7 +73,13 @@ public abstract class MCGame {
 	 * @param state The state from which to choose an action.
 	 * @return The action as an integer.
 	 */
-	public abstract int defaultAction(GameState state);
+	public int defaultAction(GameState state){
+		int[] actions = getActions(state);
+
+		int next = new Random().nextInt(actions.length);
+
+		return actions[next];
+	};
 	
 	/**
 	 * Gives the length (number of moves) of the game or an average, for games which
@@ -80,4 +88,21 @@ public abstract class MCGame {
 	 * @return The game length.
 	 */
 	public abstract int gameLength();
+	
+	/**
+	 * Gets all the successor states of the given state.
+	 * 
+	 * @param state The state whose successors will be returned.
+	 * @return The successors of the given state.
+	 */
+	public GameState[] getChildStates(GameState state){
+		int[] actions = getActions(state);
+		GameState[] children = new GameState[actions.length];
+		
+		for(int i = 0; i < children.length; i++){
+			children[i] = getSuccessorState(state, actions[i]);
+		}
+		
+		return children;
+	}
 }
