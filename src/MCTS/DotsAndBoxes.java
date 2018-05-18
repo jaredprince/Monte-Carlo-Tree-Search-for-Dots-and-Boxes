@@ -275,7 +275,7 @@ public class DotsAndBoxes extends MCGame {
 	 * 
 	 * @param  edge The edge to check.
 	 * @param  state The state of the board.
-	 * @return The number of boxes connected to edge with n edges (0 - 2)
+	 * @return The number of boxes connected to edge with 4 edges.
 	 */
 	public int completedBoxesForEdge(int edge, GameState state){
 		int[] boxes = boxPerEdge(edge, state);
@@ -283,7 +283,7 @@ public class DotsAndBoxes extends MCGame {
 		if(boxes.length == 1){
 			return boxes[0] == 4 ? 1 : 0;
 		} else {
-			return boxes[0] + boxes[1];
+			return (boxes[0] == 4 ? 1 : 0) + (boxes[1] == 4 ? 1 : 0);
 		}
 	}
 	
@@ -314,12 +314,11 @@ public class DotsAndBoxes extends MCGame {
 				
 				//edge not found
 				if(s.length() < edges - boxEdges[index][b]){
-					break;
+					continue;
 				}
 				
 				if(s.charAt(boxEdges[index][b] - (edges - s.length())) == '1'){
 					boxes[i]++;
-					break;
 				}
 			}
 		}
